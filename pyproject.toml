@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hive-cli"
+version = "0.0.1"
+authors = [
+  { name="Hive", email="hive@hiverage.ai" },
+]
+description = "Hive CLI for managing Hive"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "PyYAML>=5.1",
+]
+
+[project.optional-dependencies]
+test = [
+]
+
+[project.scripts]
+hive = "hive_cli.main:main"
