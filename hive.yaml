@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+# name: test
+generateName: test-
+>>>>>>> ef5d8d3 (update)
 repo:
   url: https://github.com/hiverge/beluga-direct-plan-project.git
 evaluator:
