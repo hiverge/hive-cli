@@ -23,4 +23,4 @@ jobs:
           uv pip install -e .
 
       - name: Lint
-        run: make lint
+        run: uv run make lint
