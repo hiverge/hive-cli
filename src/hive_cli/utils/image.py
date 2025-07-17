@@ -1,17 +1,23 @@
 import subprocess
 
+
 def build_image(
     image: str,
     platforms: str = "linux/amd64,linux/arm64",
     context: str = ".",
     dockerfile: str = "Dockerfile",
-    push: bool = False
+    push: bool = False,
 ):
     cmd = [
-        "docker", "buildx", "build",
-        "--platform", platforms,
-        "--file", dockerfile,
-        "--tag", image,
+        "docker",
+        "buildx",
+        "build",
+        "--platform",
+        platforms,
+        "--file",
+        dockerfile,
+        "--tag",
+        image,
         context,
     ]
     if push:

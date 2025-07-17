@@ -1,8 +1,9 @@
 from datetime import datetime
 
-class Runtime():
+
+class Runtime:
     def __init__(self, name: str):
-        """ Initialize the Runtime with a name.
+        """Initialize the Runtime with a name.
         This can be used to set up any necessary runtime configurations.
         """
 
@@ -17,7 +18,7 @@ def generate_experiment_name(base_name: str) -> str:
 
     experiment_name = base_name
 
-    if base_name.endswith('-'):
+    if base_name.endswith("-"):
         timestamp = datetime.now().strftime("%Y-%m-%d-%H%M%S")
         experiment_name = f"{base_name}{timestamp}"
 

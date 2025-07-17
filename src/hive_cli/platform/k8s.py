@@ -2,6 +2,7 @@ from hive_cli.config import HiveConfig
 from hive_cli.platform.base import Platform
 from hive_cli.utils.logger import logger
 
+
 class K8sPlatform(Platform):
     def __init__(self, name: str):
         super().__init__(name)

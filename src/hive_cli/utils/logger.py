@@ -1,11 +1,12 @@
 import logging
 import os
 
-from rich.logging import RichHandler
 from dotenv import load_dotenv
+from rich.logging import RichHandler
 
 # load the .env file.
 load_dotenv()
+
 
 def setup_logging(name: str) -> logging.Logger:
     """
@@ -18,15 +19,14 @@ def setup_logging(name: str) -> logging.Logger:
     logging.basicConfig(
         level=log_level,
         format="%(name)s %(message)s",
-        handlers=[RichHandler(
-            show_time=True,
-            show_level=True,
-            show_path=False,
-            markup=True,
-            rich_tracebacks=True
-        )],
+        handlers=[
+            RichHandler(
+                show_time=True, show_level=True, show_path=False, markup=True, rich_tracebacks=True
+            )
+        ],
     )
 
     return logging.getLogger(name)
+
 
 logger = setup_logging("hive-cli")

@@ -1,5 +1,7 @@
 from hive_cli.config import HiveConfig
+
 from .base import Platform
+
 
 class OnPremPlatform(Platform):
     def __init__(self, name: str):

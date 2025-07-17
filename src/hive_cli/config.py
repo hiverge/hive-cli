@@ -1,31 +1,36 @@
-from email.mime import image
 from enum import Enum
-from optparse import Option
 from typing import Optional
 
-from pydantic import BaseModel
 import yaml
+from pydantic import BaseModel
+
 
 class PlatformType(str, Enum):
     K8S = "k8s"
     ON_PREM = "on-prem"
 
+
 class CoordinatorConfig(BaseModel):
     image: str
+
 
 class EvaluatorConfig(BaseModel):
     image: Optional[str] = None
     timeout: int = 60
 
+
 class RepoConfig(BaseModel):
     url: str
     branch: str = "main"
 
+
 class WanDBConfig(BaseModel):
     enabled: bool = False
 
+
 class GCPConfig(BaseModel):
     project_id: str
+
 
 class HiveConfig(BaseModel):
     platform: PlatformType = PlatformType.K8S
@@ -38,8 +43,9 @@ class HiveConfig(BaseModel):
     # cloud vendor configuration
     gcp: Optional[GCPConfig] = None
 
+
 def load_config(file_path: str) -> HiveConfig:
     """Load configuration from a YAML file."""
-    with open(file_path, 'r') as file:
+    with open(file_path, "r") as file:
         config_data = yaml.safe_load(file)
     return HiveConfig(**config_data)

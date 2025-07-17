@@ -4,7 +4,6 @@ import os
 import unittest
 
 import requests
-
 from sandbox_utils import common_tools, launch_sandbox
 
 CODE = """

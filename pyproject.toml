@@ -28,6 +28,20 @@ dependencies = [
 [project.optional-dependencies]
 test = [
 ]
+dev = [
+  "ruff>=0.12",
+]
 
 [project.scripts]
 hive = "hive_cli.main:main"
+
+[tool.ruff]
+line-length = 100
+exclude = ["libraries"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
