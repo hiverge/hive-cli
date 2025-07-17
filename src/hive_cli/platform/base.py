@@ -1,12 +1,21 @@
 from abc import ABC, abstractmethod
+from math import log
+from os import name
+from pathlib import Path
+import shutil
+import tempfile
+from time import sleep
 
-from datetime import datetime
 
 from hive_cli.config import HiveConfig
+from hive_cli.runtime.runtime import Runtime
+from hive_cli.utils import git
+from hive_cli.utils.image import build_image
+from hive_cli.utils.logger import logger
 
-class Platform(ABC):
+class Platform(Runtime, ABC):
     @abstractmethod
-    def create(self, name: str, config: HiveConfig):
+    def create(self, config: HiveConfig):
         pass
 
     @abstractmethod
@@ -21,13 +30,102 @@ class Platform(ABC):
     def show_experiments(self, args):
         pass
 
+    def __init__(self, name: str):
+        super().__init__(name)
 
-    def generate_experiment_name(self, base_name: str) -> str:
+    # setup_environment function can be used to prepare the environment for the experiment
+    def setup_environment(self, config: HiveConfig) -> None:
         """
-        Generate a unique experiment name based on the base name and current timestamp.
-        If the base name ends with '-', it will be suffixed with a timestamp.
+        Set up the environment for the experiment.
+        This includes building the Docker image and preparing any necessary resources.
         """
-        if base_name.endswith('-'):
-            timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-            return f"{base_name}{timestamp}"
-        return base_name
+
+        logger.info(f"Setting up environment for experiment '{self.experiment_name}'")
+        logger.debug(f"The HiveConfig: {config}")
+
+        # Here you can add more setup logic, like initializing Kubernetes resources
+        # or configuring the environment based on the HiveConfig.
+        with tempfile.TemporaryDirectory(dir="./tmp") as temp_dir:
+            self.prepare_images(config, temp_dir, push=True)
+
+    def prepare_images(self, config: HiveConfig, temp_dir: str, push: bool = False) -> None:
+        """
+        Build the Docker image for the experiment.
+        If `push` is True, it will push the image to the registry.
+        """
+
+        logger.debug(f"Preparing images for experiment '{self.experiment_name}' in {temp_dir}")
+
+        # TODO: refactor this part to use an image by default rather than build from the scratch.
+        shutil.copytree(
+            "./libraries",
+            Path("./tmp") / temp_dir,
+            dirs_exist_ok=True,
+        )
+        dest = Path(temp_dir) / "repo"
+
+        logger.debug(f"Cloning repository {config.repo.url} to {dest}")
+        git.clone_repo(config.repo.url, dest, config.repo.branch)
+
+        if not (dest / "Dockerfile").exists():
+            # Generate Dockerfile for the experiment
+            generate_dockerfile(dest)
+
+        logger.debug(f"Building repo image in {dest}")
+        # build the repository image first
+        build_image(
+            image="repo-image:latest",
+            platforms="linux/amd64",
+            context=dest,
+            dockerfile=dest / "Dockerfile",
+            # this is a temporary image, so we don't push it
+            push=False,
+        )
+
+        # TODO: what if we don't use GCP?
+        image_name = f"gcr.io/{config.gcp.project_id}/{self.experiment_name}"
+
+        logger.debug(f"Building evaluator image {image_name} in {temp_dir} with push={push}")
+        # build the evaluator image
+        build_image(
+            image=image_name,
+            platforms="linux/amd64",
+            context=temp_dir,
+            dockerfile=f"{temp_dir}/Dockerfile",
+            push=push,
+        )
+
+        logger.debug(f"Images prepared for experiment '{self.experiment_name}' successfully.")
+
+def generate_dockerfile(dest: Path) -> None:
+  """Create a Dockerfile inside `dest`."""
+  lines = [
+    "FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim",
+    "",
+    "RUN apt-get update && apt-get install --no-install-recommends -y \\",
+    "cmake \\",
+    "build-essential \\",
+    "pkg-config \\",
+    "&& rm -rf /var/lib/apt/lists/*",
+    "",
+    "WORKDIR /app",
+    "",
+    "# Install sandbox server dependencies",
+  ]
+  if (dest / "pyproject.toml").exists():
+    lines.append("# Install repository dependencies from pyproject.toml")
+    lines.append("COPY pyproject.toml .")
+    lines.append("RUN uv pip install --system --requirement pyproject.toml")
+  elif (dest / "requirements.txt").exists():
+    lines.append("# Install repository dependencies from requirements.txt")
+    lines.append("COPY requirements.txt .")
+    lines.append("RUN uv pip install --system --requirement requirements.txt")
+
+  lines.extend(
+    [
+      "",
+      "# Copy server code and evaluation file",
+      "COPY . repo",
+    ]
+  )
+  (dest / "Dockerfile").write_text("\n".join(lines), encoding="utf-8")

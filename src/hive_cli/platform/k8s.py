@@ -1,59 +1,27 @@
-from pathlib import Path
-import tempfile
-
-import yaml
-
 from hive_cli.config import HiveConfig
-from .base import Platform
+from hive_cli.platform.base import Platform
+from hive_cli.utils.logger import logger
 
 class K8sPlatform(Platform):
-    def create(self, name: str, config: HiveConfig):
-        print(f"Creating experiment on Kubernetes with name: {self.generate_experiment_name(name)}")
+    def __init__(self, name: str):
+        super().__init__(name)
 
-        with tempfile.TemporaryDirectory(dir="./tmp") as temp_dir:
-            # create a a.txt file in the temporary directory
-            with open(Path(temp_dir) / "a.txt", "w") as f:
-                f.write("This is a temporary file for testing.")
+    def create(self, config: HiveConfig):
+        logger.info(f"Creating experiment '{self.experiment_name}' on Kubernetes...")
 
+        self.setup_environment(config)
+
+        logger.info(f"Experiment '{self.experiment_name}' created successfully on Kubernetes.")
+
+    def deploy(self, config: HiveConfig):
+        logger.info(f"Deploying experiment '{self.experiment_name}' on Kubernetes...")
 
     def delete(self, args):
-        print("Deleting experiment on Kubernetes...")
+        logger.info(f"Deleting experiment '{self.experiment_name}' on {args.platform} platform...")
+        self.cleanup_environment(self.experiment_name)
 
     def login(self, args):
-        print("Logging in to hive on Kubernetes...")
+        logger.info(f"Logging in to hive on {args.platform} platform...")
 
     def show_experiments(self, args):
-        print("Showing experiments on Kubernetes...")
-
-def generate_dockerfile(dest: Path) -> None:
-  """Create a Dockerfile inside `dest`."""
-  lines = [
-    "FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim",
-    "",
-    "RUN apt-get update && apt-get install --no-install-recommends -y \\",
-    "cmake \\",
-    "build-essential \\",
-    "pkg-config \\",
-    "&& rm -rf /var/lib/apt/lists/*",
-    "",
-    "WORKDIR /app",
-    "",
-    "# Install sandbox server dependencies",
-  ]
-  if (dest / "pyproject.toml").exists():
-    lines.append("# Install repository dependencies from pyproject.toml")
-    lines.append("COPY pyproject.toml .")
-    lines.append("RUN uv pip install --system --requirement pyproject.toml")
-  elif (dest / "requirements.txt").exists():
-    lines.append("# Install repository dependencies from requirements.txt")
-    lines.append("COPY requirements.txt .")
-    lines.append("RUN uv pip install --system --requirement requirements.txt")
-
-  lines.extend(
-    [
-      "",
-      "# Copy server code and evaluation file",
-      "COPY . repo",
-    ]
-  )
-  (dest / "Dockerfile").write_text("\n".join(lines), encoding="utf-8")
+        logger.info(f"Showing experiments on {args.platform} platform...")

@@ -1,12 +1,9 @@
 import argparse
-from json import load
-
-import yaml
 
 from hive_cli.config import load_config
-
-from .platform.k8s import K8sPlatform
-from .platform.onprem import OnPremPlatform
+from hive_cli.platform.k8s import K8sPlatform
+from hive_cli.platform.onprem import OnPremPlatform
+from hive_cli.utils.logger import logger
 
 PLATFORMS = {
     "k8s": K8sPlatform,
@@ -17,13 +14,16 @@ def init(args):
     print("(Unimplemented) Initializing hive...")
 
 def create(args):
-    config_file = args.config
-    config = load_config(config_file)
-    platform = PLATFORMS[config.platform.value]
-    platform().create(args.name, config=config)
+    config = load_config(args.config)
+    # Init the platform based on the config.
+    platform = PLATFORMS[config.platform.value](args.name)
+
+    platform.create(config=config)
+
 
 def delete(args):
-    print("Deleting hive...")
+    platform = PLATFORMS[args.platform](args.name)
+    platform.delete(args)
 
 def main():
     parser = argparse.ArgumentParser(description="Hive CLI")

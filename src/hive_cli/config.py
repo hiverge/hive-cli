@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
 import yaml
@@ -15,9 +16,13 @@ class EvaluatorConfig(BaseModel):
 
 class RepoConfig(BaseModel):
     url: str
+    branch: str = "main"
 
 class WanDBConfig(BaseModel):
     enabled: bool = False
+
+class GCPConfig(BaseModel):
+    project_id: str
 
 class HiveConfig(BaseModel):
     platform: PlatformType = PlatformType.K8S
@@ -26,6 +31,9 @@ class HiveConfig(BaseModel):
     # coordinator: CoordinatorConfig
     evaluator: EvaluatorConfig
     wandb: WanDBConfig
+
+    # cloud vendor configuration
+    gcp: Optional[GCPConfig] = None
 
 def load_config(file_path: str) -> HiveConfig:
     """Load configuration from a YAML file."""

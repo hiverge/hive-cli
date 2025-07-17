@@ -1,6 +1,6 @@
 import subprocess
 
-def buildImages(
+def build_image(
     image: str,
     platforms: str = "linux/amd64,linux/arm64",
     context: str = ".",
@@ -8,7 +8,7 @@ def buildImages(
     push: bool = False
 ):
     cmd = [
-        "docker", "buildx", "build",
+        "docker", "build",
         "--platform", platforms,
         "--file", dockerfile,
         "--tag", image,
@@ -17,4 +17,13 @@ def buildImages(
     if push:
         cmd.append("--push")
 
-    subprocess.run(cmd, check=True)
+    try:
+        subprocess.run(
+            cmd,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError as e:
+        print("Build STDERR:\n", e.stderr)
+        raise
