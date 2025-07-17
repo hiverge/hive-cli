@@ -1,11 +1,9 @@
+from hive_cli.config import HiveConfig
 from .base import Platform
 
 class OnPremPlatform(Platform):
-    def init(self, args):
-        print("Initializing hive on-premise...")
-
-    def create(self, args):
-        print(f"Creating hive on-premise with config: {args.config}")
+    def create(self, name: str, config: HiveConfig):
+        print(f"Creating hive on-premise with name: {name} and config: {config}")
 
     def delete(self, args):
         print("Deleting hive on-premise...")

@@ -1,0 +1,13 @@
+[project]
+name = "python-sandbox-server"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "flask==2.3.3",
+  "gunicorn==21.2.0",
+  "requests",
+  "numpy",
+  "psutil"
+]

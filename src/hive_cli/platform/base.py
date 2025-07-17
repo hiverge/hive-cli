@@ -2,13 +2,11 @@ from abc import ABC, abstractmethod
 
 from datetime import datetime
 
+from hive_cli.config import HiveConfig
+
 class Platform(ABC):
     @abstractmethod
-    def init(self, args):
-        pass
-
-    @abstractmethod
-    def create(self, args):
+    def create(self, name: str, config: HiveConfig):
         pass
 
     @abstractmethod
