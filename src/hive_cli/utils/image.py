@@ -8,7 +8,7 @@ def build_image(
     push: bool = False
 ):
     cmd = [
-        "docker", "build",
+        "docker", "buildx", "build",
         "--platform", platforms,
         "--file", dockerfile,
         "--tag", image,

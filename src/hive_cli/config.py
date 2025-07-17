@@ -1,4 +1,6 @@
+from email.mime import image
 from enum import Enum
+from optparse import Option
 from typing import Optional
 
 from pydantic import BaseModel
@@ -9,9 +11,10 @@ class PlatformType(str, Enum):
     ON_PREM = "on-prem"
 
 class CoordinatorConfig(BaseModel):
-    pass
+    image: str
 
 class EvaluatorConfig(BaseModel):
+    image: Optional[str] = None
     timeout: int = 60
 
 class RepoConfig(BaseModel):
@@ -28,7 +31,7 @@ class HiveConfig(BaseModel):
     platform: PlatformType = PlatformType.K8S
 
     repo: RepoConfig
-    # coordinator: CoordinatorConfig
+    coordinator: CoordinatorConfig
     evaluator: EvaluatorConfig
     wandb: WanDBConfig
 

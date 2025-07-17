@@ -33,11 +33,18 @@ class Platform(Runtime, ABC):
     def __init__(self, name: str):
         super().__init__(name)
 
-    # setup_environment function can be used to prepare the environment for the experiment
-    def setup_environment(self, config: HiveConfig) -> None:
+    # setup_environment function can be used to prepare the environment for the experiment,
+    # shared logic for both K8s and OnPrem platforms.
+    def setup_environment(self, config: HiveConfig) -> HiveConfig:
         """
         Set up the environment for the experiment.
         This includes building the Docker image and preparing any necessary resources.
+
+        Args:
+            config (HiveConfig): The configuration for the experiment.
+
+        Returns:
+            HiveConfig: The updated configuration with the image name set.
         """
 
         logger.info(f"Setting up environment for experiment '{self.experiment_name}'")
@@ -46,12 +53,25 @@ class Platform(Runtime, ABC):
         # Here you can add more setup logic, like initializing Kubernetes resources
         # or configuring the environment based on the HiveConfig.
         with tempfile.TemporaryDirectory(dir="./tmp") as temp_dir:
-            self.prepare_images(config, temp_dir, push=True)
+            image_name = self.prepare_images(config, temp_dir, push=True)
 
-    def prepare_images(self, config: HiveConfig, temp_dir: str, push: bool = False) -> None:
+            # Populate related fields to the config, only allow to update here.
+            config.evaluator.image = image_name
+
+        logger.debug(f"The updated HiveConfig: {config}")
+
+    def prepare_images(self, config: HiveConfig, temp_dir: str, push: bool = False) -> str:
         """
         Build the Docker image for the experiment.
         If `push` is True, it will push the image to the registry.
+
+        Args:
+            config (HiveConfig): The configuration for the experiment.
+            temp_dir (str): The temporary directory to use for building the image.
+            push (bool): Whether to push the image to the registry.
+
+        Returns:
+            str: The name of the built image.
         """
 
         logger.debug(f"Preparing images for experiment '{self.experiment_name}' in {temp_dir}")
@@ -71,7 +91,7 @@ class Platform(Runtime, ABC):
             # Generate Dockerfile for the experiment
             generate_dockerfile(dest)
 
-        logger.debug(f"Building repo image in {dest}")
+        logger.debug(f"Building temporary repo image in {dest}")
         # build the repository image first
         build_image(
             image="repo-image:latest",
@@ -95,7 +115,8 @@ class Platform(Runtime, ABC):
             push=push,
         )
 
-        logger.debug(f"Images prepared for experiment '{self.experiment_name}' successfully.")
+        logger.debug(f"Images {image_name} prepared for experiment '{self.experiment_name}' successfully.")
+        return image_name
 
 def generate_dockerfile(dest: Path) -> None:
   """Create a Dockerfile inside `dest`."""

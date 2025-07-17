@@ -9,16 +9,18 @@ class K8sPlatform(Platform):
     def create(self, config: HiveConfig):
         logger.info(f"Creating experiment '{self.experiment_name}' on Kubernetes...")
 
-        self.setup_environment(config)
+        config = self.setup_environment(config)
+        self.deploy(config)
 
-        logger.info(f"Experiment '{self.experiment_name}' created successfully on Kubernetes.")
+        logger.info(f"Launch experiment '{self.experiment_name}' successfully on Kubernetes.")
 
     def deploy(self, config: HiveConfig):
         logger.info(f"Deploying experiment '{self.experiment_name}' on Kubernetes...")
 
+        logger.info(f"Experiment '{self.experiment_name}' deployed successfully on Kubernetes.")
+
     def delete(self, args):
         logger.info(f"Deleting experiment '{self.experiment_name}' on {args.platform} platform...")
-        self.cleanup_environment(self.experiment_name)
 
     def login(self, args):
         logger.info(f"Logging in to hive on {args.platform} platform...")
