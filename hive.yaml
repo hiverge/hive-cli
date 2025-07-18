@@ -2,12 +2,14 @@
 # but you can use it as a template for your own configuration.
 # TODO: in the future, we'll generate it automatically with `hive init`.
 
+project_name: beluga-direct-plan-project
 platform: k8s
 repo:
   url: https://github.com/hiverge/beluga-direct-plan-project.git
 evaluator:
   # image will be set automatically after building the image
   # image: <>
+  replicas: 10
   timeout: 60
 coordinator:
   image: hive-coordinator:latest

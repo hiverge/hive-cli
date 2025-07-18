@@ -16,7 +16,7 @@ class Platform(Runtime, ABC):
         pass
 
     @abstractmethod
-    def delete(self, args):
+    def delete(self, name: str):
         pass
 
     @abstractmethod
@@ -56,6 +56,7 @@ class Platform(Runtime, ABC):
             config.evaluator.image = image_name
 
         logger.debug(f"The updated HiveConfig: {config}")
+        return config
 
     def prepare_images(self, config: HiveConfig, temp_dir: str, push: bool = False) -> str:
         """
@@ -100,7 +101,7 @@ class Platform(Runtime, ABC):
         )
 
         # TODO: what if we don't use GCP?
-        image_name = f"gcr.io/{config.gcp.project_id}/{self.experiment_name}"
+        image_name = f"gcr.io/{config.gcp.project_id}/{config.project_name}:{self.experiment_name}"
 
         logger.debug(f"Building evaluator image {image_name} in {temp_dir} with push={push}")
         # build the evaluator image

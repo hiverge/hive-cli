@@ -16,6 +16,7 @@ class CoordinatorConfig(BaseModel):
 
 class EvaluatorConfig(BaseModel):
     image: Optional[str] = None
+    replicas: int = 1
     timeout: int = 60
 
 
@@ -33,6 +34,7 @@ class GCPConfig(BaseModel):
 
 
 class HiveConfig(BaseModel):
+    project_name: str # project_name is for a specific project, like the beluga-direct-plan-project.
     platform: PlatformType = PlatformType.K8S
 
     repo: RepoConfig
