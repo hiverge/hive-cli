@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from kubernetes import client, config as k8s_config
+from kubernetes import client
+from kubernetes import config as k8s_config
 
 
 class Runtime:

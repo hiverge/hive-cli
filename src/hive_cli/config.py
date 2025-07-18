@@ -34,7 +34,9 @@ class GCPConfig(BaseModel):
 
 
 class HiveConfig(BaseModel):
-    project_name: str # project_name is for a specific project, like the beluga-direct-plan-project.
+    project_name: (
+        str  # project_name is for a specific project, like the beluga-direct-plan-project.
+    )
     platform: PlatformType = PlatformType.K8S
 
     repo: RepoConfig

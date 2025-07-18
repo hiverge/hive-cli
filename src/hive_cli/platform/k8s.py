@@ -1,5 +1,3 @@
-from math import log
-from kubernetes import client, config as k8s_config
 from kubernetes.client.rest import ApiException
 
 from hive_cli.config import HiveConfig
@@ -45,7 +43,6 @@ class K8sPlatform(Platform):
                 f"An unexpected error occurred while creating experiment '{self.experiment_name}': {e}"
             )
 
-
     def delete(self, name: str):
         logger.info(f"Deleting experiment '{self.experiment_name}' on Kubernetes...")
         try:
@@ -57,16 +54,11 @@ class K8sPlatform(Platform):
                 plural=RESOURCE_PLURAL,
                 name=name,
             )
-            logger.info(
-                f"Experiment '{name}' deleted successfully on Kubernetes."
-            )
+            logger.info(f"Experiment '{name}' deleted successfully on Kubernetes.")
         except ApiException as e:
             logger.error(f"Failed to delete experiment '{name}' on Kubernetes: {e}")
         except Exception as e:
             logger.error(f"An unexpected error occurred while deleting experiment '{name}': {e}")
-
-
-
 
     def login(self, args):
         logger.info(f"Logging in to hive on {args.platform} platform...")
