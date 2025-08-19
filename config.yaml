@@ -20,6 +20,8 @@ sandbox:
       memory: "2Gi"
     shmsize: "4Gi"
     accelerators: a100-40gb:1 # or a100-80gb:8 or h100:8
+  pre_processor: |
+    print("Running pre-processing script...")
   envs:
     - name: LOCK_SANDBOX
       value: "true"

@@ -11,8 +11,8 @@ class PlatformType(str, Enum):
 
 
 class ResourceConfig(BaseModel):
-    requests: Optional[dict] = {"cpu": "100m", "memory": "256Mi"}
-    limits: Optional[dict] = {"cpu": "500m", "memory": "512Mi"}
+    requests: Optional[dict] = None
+    limits: Optional[dict] = None
     accelerators: Optional[str] = None  # e.g., "a100-80gb:8"
     shmsize: Optional[str] = None
 
@@ -26,9 +26,12 @@ class SandboxConfig(BaseModel):
     image: Optional[str] = None
     replicas: int = 1
     timeout: int = 60
-    resources: ResourceConfig = ResourceConfig()
+    resources: Optional[ResourceConfig] = None
     envs: Optional[list[EnvConfig]] = None
-
+    pre_processor: Optional[str] = Field(
+        default=None,
+        description="The pre-processing script to run before the experiment.",
+    )
 
 class RepoConfig(BaseModel):
     url: str

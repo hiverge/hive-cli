@@ -21,6 +21,7 @@ def build_image(
         dockerfile,
         "--tag",
         image,
+        "--load",
         context,
     ]
     if push:
