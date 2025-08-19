@@ -30,8 +30,9 @@ class SandboxConfig(BaseModel):
     envs: Optional[list[EnvConfig]] = None
     pre_processor: Optional[str] = Field(
         default=None,
-        description="The pre-processing script to run before the experiment.",
+        description="The pre-processing script to run before the experiment. Use the `/data` directory to load/store datasets.",
     )
+
 
 class RepoConfig(BaseModel):
     url: str
