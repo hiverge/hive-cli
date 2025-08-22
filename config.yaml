@@ -1,6 +1,7 @@
 # This is only an example configuration file for the Hive CLI.
 
 project_name: demo-project
+log_level: INFO
 coordinator_config_name: default-coordinator-config
 platform: k8s
 token_path: /HivergeAI/demo.kubeconfig

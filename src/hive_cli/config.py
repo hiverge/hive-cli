@@ -5,6 +5,8 @@ from typing import Optional
 import yaml
 from pydantic import BaseModel, Field, field_validator
 
+from hive_cli.utils import logger
+
 
 class PlatformType(str, Enum):
     K8S = "k8s"
@@ -96,6 +98,12 @@ class HiveConfig(BaseModel):
     # cloud vendor configuration
     cloud_provider: CloudProviderConfig
 
+    log_level: str = Field(
+        default="INFO",
+        enumerated=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        description="The logging level to use for the experiment. Default to 'INFO'.",
+    )
+
     @field_validator("project_name")
     def must_be_lowercase(cls, v):
         if not v.islower():
@@ -126,4 +134,8 @@ def load_config(file_path: str) -> HiveConfig:
     """Load configuration from a YAML file."""
     with open(file_path, "r") as file:
         config_data = yaml.safe_load(file)
-    return HiveConfig(**config_data)
+    config = HiveConfig(**config_data)
+
+    # set the logging level.
+    logger.set_log_level(config.log_level)
+    return config

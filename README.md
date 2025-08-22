@@ -82,8 +82,6 @@ See `hive -h` for more details.
 
 ## Development
 
-**Note**: Hive-CLI will read the `.env` file to load logging configurations. Refer to the `.env.example` file for examples.
-
 ### Debugging
 
-Change the log level in `.env` file to `DEBUG` to see more detailed logs.
+Change the `log_level` in the configuration file to `DEBUG` to see more detailed logs.
