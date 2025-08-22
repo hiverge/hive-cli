@@ -1,12 +1,11 @@
 """Tests for the executor module."""
 
+import asyncio
+import importlib
 import os
+import time
 import unittest
 from unittest import mock
-import importlib
-import asyncio
-
-import time
 
 import libs.main
 

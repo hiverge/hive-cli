@@ -12,4 +12,4 @@ format:
 test:
 	mkdir -p test-reports && \
 	. .venv/bin/activate && \
-	pytest -v --junitxml=test-reports/hive-report.xml
+	PYTHONPATH=libs:$$PYTHONPATH pytest -v --junitxml=test-reports/hive-report.xml

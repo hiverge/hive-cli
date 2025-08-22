@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Hive CLI for managing Hive"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -30,9 +30,7 @@ dependencies = [
 test = [
   "pytest>=6.2.4",
   "flask==2.3.3",
-  "gunicorn==21.2.0",
   "requests",
-  "numpy",
   "psutil",
 ]
 dev = [

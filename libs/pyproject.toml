@@ -6,8 +6,6 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
   "flask==2.3.3",
-  "gunicorn==21.2.0",
   "requests",
-  "numpy",
   "psutil"
 ]

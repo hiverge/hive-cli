@@ -1,20 +1,20 @@
 """Tests for launch_sandbox focusing on the local deployment."""
 
-import os
-import unittest
-
-import requests
-from libs.sandbox_utils import common_tools, launch_sandbox
-
-CODE = """
-def hive_main():
-    return {'message': 'Hello, World!'}
-"""
-
-URL = "http://localhost:8080"
-
-
 # TODO: Reimplement these tests
+# import os
+# import unittest
+
+# import requests
+# from libs.sandbox_utils import common_tools, launch_sandbox
+
+# CODE = """
+# def hive_main():
+#     return {'message': 'Hello, World!'}
+# """
+
+# URL = "http://localhost:8080"
+
+
 # class TestLaunchSandbox(unittest.TestCase):
 #   """Tests for the launch_sandbox function."""
 
