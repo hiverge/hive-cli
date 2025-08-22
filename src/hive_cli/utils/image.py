@@ -10,7 +10,7 @@ def build_image(
     context: str = ".",
     dockerfile: str = "Dockerfile",
     push: bool = False,
-    arguments: dict = None,
+    build_args: dict = None,
 ):
     cmd = [
         "docker",
@@ -28,8 +28,8 @@ def build_image(
     if push:
         cmd.append("--push")
 
-    if arguments:
-        for key, value in arguments.items():
+    if build_args:
+        for key, value in build_args.items():
             cmd.extend(["--build-arg", f"{key}={value}"])
 
     try:
