@@ -128,7 +128,6 @@ class Platform(Runtime, ABC):
             context=temp_dir,
             dockerfile=f"{temp_dir}/Dockerfile",
             push=push,
-            arguments={"TAG_ARG": f"{hash}"},
         )
 
         logger.debug(
