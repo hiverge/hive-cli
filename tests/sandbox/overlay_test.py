@@ -5,7 +5,7 @@ import shutil
 import tempfile
 import unittest
 
-from sandbox_utils import overlay
+from libs.sandbox_utils import overlay
 
 
 class TestMirrorOverlay(unittest.TestCase):

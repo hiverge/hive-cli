@@ -28,6 +28,12 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
+  "pytest>=6.2.4",
+  "flask==2.3.3",
+  "gunicorn==21.2.0",
+  "requests",
+  "numpy",
+  "psutil",
 ]
 dev = [
   "ruff>=0.12",
