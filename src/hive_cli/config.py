@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Optional
 
 import yaml
-from pydantic import BaseModel, Field, field_validator, validator
+from pydantic import BaseModel, Field, field_validator
 
 from hive_cli.utils import logger
 
