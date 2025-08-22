@@ -1,4 +1,4 @@
-FROM repo-image:latest
+FROM temp-image:latest
 
 RUN apt-get update && apt-get install -y \
     python3-pip \
