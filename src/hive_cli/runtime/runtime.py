@@ -22,7 +22,7 @@ def generate_experiment_name(base_name: str) -> str:
 
     if base_name.endswith("-"):
         timestamp = str(int(datetime.now(timezone.utc).timestamp()))
-        unique_hash = hashlib.sha1(timestamp.encode()).hexdigest()[:12]
+        unique_hash = hashlib.sha1(timestamp.encode()).hexdigest()[:7]
         experiment_name = f"{base_name}{unique_hash}"
 
     return experiment_name

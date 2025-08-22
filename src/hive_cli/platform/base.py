@@ -91,7 +91,7 @@ class Platform(Runtime, ABC):
         )
         dest = Path(temp_dir) / "repo"
 
-        git.clone_repo(config.repo.url, dest, config.repo.branch)
+        hash = git.clone_repo(config.repo.url, dest, config.repo.branch)
         logger.debug(
             f"Cloning repository {config.repo.url} to {dest}, the tree structure of the directory: {os.listdir('.')}, the tree structure of the {dest} directory: {os.listdir(dest)}"
         )
@@ -118,7 +118,8 @@ class Platform(Runtime, ABC):
         else:
             raise ValueError("Unsupported cloud provider configuration. Please enable GCP or AWS.")
 
-        image_name = f"{image_registry}:{self.experiment_name}"
+        # Use the git commit hash as the image tag to ensure uniqueness.
+        image_name = f"{image_registry}:{hash[:7]}"
 
         logger.debug(f"Building sandbox image {image_name} in {temp_dir} with push={push}")
         # build the sandbox image

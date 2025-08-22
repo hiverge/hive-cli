@@ -5,7 +5,7 @@ from pathlib import Path
 import git
 
 
-def clone_repo(repo_dir: str, output_dir: str, branch: str = "main") -> None:
+def clone_repo(repo_dir: str, output_dir: str, branch: str = "main") -> str:
     """Clone a repository into the output directory."""
     dest = Path(output_dir)
     dest.mkdir(parents=True, exist_ok=True)
@@ -23,3 +23,6 @@ def clone_repo(repo_dir: str, output_dir: str, branch: str = "main") -> None:
         if not repo_path.is_dir():
             raise NotADirectoryError(f"{repo_dir} is not a directory")
         shutil.copytree(repo_path, dest, dirs_exist_ok=True)
+        repo = git.Repo(dest)
+
+    return repo.head.commit.hexsha

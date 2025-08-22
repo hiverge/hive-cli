@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Optional
 
 import yaml
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, validator
 
 from hive_cli.utils import logger
 
@@ -39,9 +39,23 @@ class SandboxConfig(BaseModel):
 
 class RepoConfig(BaseModel):
     url: str
-    branch: str = "main"
-    evaluation_script: str = "evaluator.py"
-    evolve_files_and_ranges: str
+    branch: str = Field(
+        default="main",
+        description="The branch to use for the experiment. Default to 'main'.",
+    )
+    evaluation_script: str = Field(
+        default="evaluator.py",
+        description="The evaluation script to run for the experiment. Default to 'evaluator.py'.",
+    )
+    evolve_files_and_ranges: str = Field(
+        description="Files to evolve, support line ranges like `file.py:1-20`."
+    )
+
+    @field_validator("url")
+    def url_should_not_be_git(cls, v):
+        if v.startswith("git@"):
+            raise ValueError("Only HTTPS URLs are allowed; git@ SSH URLs are not supported.")
+        return v
 
 
 class WanDBConfig(BaseModel):
