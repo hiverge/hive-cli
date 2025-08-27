@@ -32,16 +32,28 @@ class TestMirrorOverlay(unittest.TestCase):
 
         # Build a sample directory structure in base_dir.
         # Create some files at the root.
-        with open(os.path.join(self.base_dir, "a.txt"), "w", encoding="utf-8") as f:
+        with open(
+            os.path.join(self.base_dir, "a.txt"), "w", encoding="utf-8"
+        ) as f:
             f.write("Content of a.txt")
-        with open(os.path.join(self.base_dir, "b.txt"), "w", encoding="utf-8") as f:
+        with open(
+            os.path.join(self.base_dir, "b.txt"), "w", encoding="utf-8"
+        ) as f:
             f.write("Content of b.txt")
 
         # Create a directory "subdir" with files.
         os.makedirs(os.path.join(self.base_dir, "subdir"))
-        with open(os.path.join(self.base_dir, "subdir", "c.txt"), "w", encoding="utf-8") as f:
+        with open(
+            os.path.join(self.base_dir, "subdir", "c.txt"),
+            "w",
+            encoding="utf-8",
+        ) as f:
             f.write("Content of c.txt")
-        with open(os.path.join(self.base_dir, "subdir", "d.txt"), "w", encoding="utf-8") as f:
+        with open(
+            os.path.join(self.base_dir, "subdir", "d.txt"),
+            "w",
+            encoding="utf-8",
+        ) as f:
             f.write("Content of d.txt")
 
         # Create the nested directory "sub1/sub2".
@@ -67,7 +79,11 @@ class TestMirrorOverlay(unittest.TestCase):
         ) as f:
             f.write("Content of sibling.txt")
         # Create another file in sub1 (outside the sub2 directory).
-        with open(os.path.join(self.base_dir, "sub1", "another.txt"), "w", encoding="utf-8") as f:
+        with open(
+            os.path.join(self.base_dir, "sub1", "another.txt"),
+            "w",
+            encoding="utf-8",
+        ) as f:
             f.write("Content of another.txt")
 
     def tearDown(self):
@@ -93,21 +109,34 @@ class TestMirrorOverlay(unittest.TestCase):
 
         # "subdir" should be entirely symlinked.
         subdir_link = os.path.join(self.overlay_dir, "subdir")
-        self.assertTrue(os.path.islink(subdir_link), "subdir should be a symlink.")
+        self.assertTrue(
+            os.path.islink(subdir_link), "subdir should be a symlink."
+        )
 
         # "sub1" should be a real directory since it's on the path to the target.
         sub1_dir = os.path.join(self.overlay_dir, "sub1")
-        self.assertFalse(os.path.islink(sub1_dir), "sub1 should be a real directory.")
-        self.assertTrue(os.path.isdir(sub1_dir), "sub1 should exist as a directory.")
+        self.assertFalse(
+            os.path.islink(sub1_dir), "sub1 should be a real directory."
+        )
+        self.assertTrue(
+            os.path.isdir(sub1_dir), "sub1 should exist as a directory."
+        )
 
         # In "sub1", "another.txt" should be symlinked.
         another_link = os.path.join(sub1_dir, "another.txt")
-        self.assertTrue(os.path.islink(another_link), "another.txt in sub1 should be a symlink.")
+        self.assertTrue(
+            os.path.islink(another_link),
+            "another.txt in sub1 should be a symlink.",
+        )
 
         # "sub1/sub2" should be a real directory.
         sub2_dir = os.path.join(sub1_dir, "sub2")
-        self.assertFalse(os.path.islink(sub2_dir), "sub1/sub2 should be a real directory.")
-        self.assertTrue(os.path.isdir(sub2_dir), "sub1/sub2 should exist as a directory.")
+        self.assertFalse(
+            os.path.islink(sub2_dir), "sub1/sub2 should be a real directory."
+        )
+        self.assertTrue(
+            os.path.isdir(sub2_dir), "sub1/sub2 should exist as a directory."
+        )
 
         # In "sub1/sub2":
         # - "target.txt" should NOT exist (it is the file to be overridden).
@@ -120,7 +149,10 @@ class TestMirrorOverlay(unittest.TestCase):
         # - All other files should be symlinked.
         other_link = os.path.join(sub2_dir, "other.txt")
         sibling_link = os.path.join(sub2_dir, "sibling.txt")
-        self.assertTrue(os.path.islink(other_link), "other.txt should be a symlink in sub1/sub2.")
+        self.assertTrue(
+            os.path.islink(other_link),
+            "other.txt should be a symlink in sub1/sub2.",
+        )
         self.assertTrue(
             os.path.islink(sibling_link),
             "sibling.txt should be a symlink in sub1/sub2.",
@@ -140,12 +172,19 @@ class TestMirrorOverlay(unittest.TestCase):
 
         # Check that "d.txt" in "subdir" is symlinked.
         d_link = os.path.join(self.overlay_dir, "subdir", "d.txt")
-        self.assertTrue(os.path.islink(d_link), "subdir/d.txt should be a symlink.")
+        self.assertTrue(
+            os.path.islink(d_link), "subdir/d.txt should be a symlink."
+        )
         # Check that "sub1/another.txt" is symlinked.
         another_link = os.path.join(self.overlay_dir, "sub1", "another.txt")
-        self.assertTrue(os.path.islink(another_link), "sub1/another.txt should be a symlink.")
+        self.assertTrue(
+            os.path.islink(another_link),
+            "sub1/another.txt should be a symlink.",
+        )
         # Check that "sub1/sub2/other.txt" is still not present.
-        other_target_path = os.path.join(self.overlay_dir, "sub1", "sub2", "other.txt")
+        other_target_path = os.path.join(
+            self.overlay_dir, "sub1", "sub2", "other.txt"
+        )
         self.assertFalse(
             os.path.exists(other_target_path),
             "sub1/sub2/other.txt should not exist in the overlay.",
@@ -170,7 +209,9 @@ class TestMirrorOverlay(unittest.TestCase):
 
         # The "subdir" directory should be symlinked.
         subdir_link = os.path.join(self.overlay_dir, "subdir")
-        self.assertTrue(os.path.islink(subdir_link), "subdir should be a symlink.")
+        self.assertTrue(
+            os.path.islink(subdir_link), "subdir should be a symlink."
+        )
 
         # The "sub1" directory should be symlinked.
         sub1_link = os.path.join(self.overlay_dir, "sub1")
@@ -185,11 +226,18 @@ class TestMirrorOverlay(unittest.TestCase):
         }
 
         # Execute the overlay creation and overwrite.
-        overlay.mirror_overlay_and_overwrite(self.base_dir, self.overlay_dir, file_content_map)
+        overlay.mirror_overlay_and_overwrite(
+            self.base_dir, self.overlay_dir, file_content_map
+        )
 
         # Check that the target file has been overwritten.
-        target_path = os.path.join(self.overlay_dir, "sub1", "sub2", "target.txt")
-        self.assertTrue(os.path.exists(target_path), "target.txt should exist in the overlay.")
+        target_path = os.path.join(
+            self.overlay_dir, "sub1", "sub2", "target.txt"
+        )
+        self.assertTrue(
+            os.path.exists(target_path),
+            "target.txt should exist in the overlay.",
+        )
         with open(target_path, encoding="utf-8") as f:
             content = f.read()
             self.assertEqual(
@@ -200,7 +248,10 @@ class TestMirrorOverlay(unittest.TestCase):
 
         # Check that c.txt has been overwritten.
         c_target_path = os.path.join(self.overlay_dir, "subdir", "c.txt")
-        self.assertTrue(os.path.exists(c_target_path), "subdir/c.txt should exist in the overlay.")
+        self.assertTrue(
+            os.path.exists(c_target_path),
+            "subdir/c.txt should exist in the overlay.",
+        )
         with open(c_target_path, encoding="utf-8") as f:
             content = f.read()
             self.assertEqual(
@@ -217,12 +268,114 @@ class TestMirrorOverlay(unittest.TestCase):
             os.makedirs(base_dir, exist_ok=True)
 
             # Define an invalid relative path
-            file_content_map = {"../invalid_path.txt": "This should raise an error"}
+            file_content_map = {
+                "../invalid_path.txt": "This should raise an error"
+            }
 
             with self.assertRaises(
-                ValueError, msg="Invalid relative path detected: ../invalid_path.txt"
+                ValueError,
+                msg="Invalid relative path detected: ../invalid_path.txt",
             ):
-                overlay.mirror_overlay_and_overwrite(base_dir, overlay_dir, file_content_map)
+                overlay.mirror_overlay_and_overwrite(
+                    base_dir, overlay_dir, file_content_map
+                )
+
+    def test_symlink_and_copy_semantics(self):
+        repo = self.base_dir
+        dest = self.overlay_dir
+
+        # Symlink the entire "subdir" directory and just the single file "sub1/sub2/target.txt".
+        patterns = [
+            r"(?:^|/)subdir(?:/|$)",  # directory symlink
+            r"(?:^|/)sub1/sub2/target\.txt$",  # single-file symlink
+        ]
+        overlay.mirror_with_symlink_exceptions(repo, dest, patterns)
+
+        # ---- Asserts: copied files (not links)
+        a = os.path.join(dest, "a.txt")
+        b = os.path.join(dest, "b.txt")
+        self.assertTrue(os.path.isfile(a) and not os.path.islink(a))
+        self.assertTrue(os.path.isfile(b) and not os.path.islink(b))
+
+        another = os.path.join(dest, "sub1", "another.txt")
+        self.assertTrue(os.path.isfile(another) and not os.path.islink(another))
+
+        # In sub2, other.txt and sibling.txt should be copied (non-matching)
+        other = os.path.join(dest, "sub1", "sub2", "other.txt")
+        sibling = os.path.join(dest, "sub1", "sub2", "sibling.txt")
+        self.assertTrue(os.path.isfile(other) and not os.path.islink(other))
+        self.assertTrue(os.path.isfile(sibling) and not os.path.islink(sibling))
+
+        # ---- Asserts: symlinked directory
+        subdir_link = os.path.join(dest, "subdir")
+        self.assertTrue(os.path.islink(subdir_link))
+        self.assertEqual(
+            os.path.realpath(subdir_link),
+            os.path.realpath(os.path.join(repo, "subdir")),
+        )
+        # Files inside the symlinked directory should be visible
+        self.assertTrue(os.path.exists(os.path.join(subdir_link, "c.txt")))
+        self.assertTrue(os.path.exists(os.path.join(subdir_link, "d.txt")))
+
+        # ---- Asserts: symlinked single file
+        target_link = os.path.join(dest, "sub1", "sub2", "target.txt")
+        self.assertTrue(os.path.islink(target_link))
+        self.assertEqual(
+            os.path.realpath(target_link),
+            os.path.realpath(os.path.join(repo, "sub1", "sub2", "target.txt")),
+        )
+
+        # ---- Behavior: source edits reflect through symlinked paths
+        with open(
+            os.path.join(repo, "subdir", "c.txt"), "w", encoding="utf-8"
+        ) as f:
+            f.write("updated c")
+        with open(
+            os.path.join(repo, "sub1", "sub2", "target.txt"),
+            "w",
+            encoding="utf-8",
+        ) as f:
+            f.write("updated target")
+
+        with open(
+            os.path.join(subdir_link, "c.txt"), "r", encoding="utf-8"
+        ) as f:
+            self.assertEqual(f.read(), "updated c")
+        with open(target_link, "r", encoding="utf-8") as f:
+            self.assertEqual(f.read(), "updated target")
+
+        # ---- Behavior: editing copied files in overlay doesn't change source
+        with open(a, "w", encoding="utf-8") as f:
+            f.write("overlay edit a")
+        with open(os.path.join(repo, "a.txt"), "r", encoding="utf-8") as f:
+            self.assertEqual(f.read(), "Content of a.txt")
+
+        # ---- Idempotency: running again keeps semantics
+        overlay.mirror_with_symlink_exceptions(repo, dest, patterns)
+        self.assertTrue(os.path.islink(subdir_link))
+        self.assertTrue(os.path.islink(target_link))
+        self.assertTrue(os.path.isfile(a) and not os.path.islink(a))
+
+    def test_relative_paths_and_boundaries(self):
+        """Ensure regexes match path boundaries correctly and don't overmatch."""
+        repo = self.base_dir
+        dest = self.overlay_dir
+
+        # This should match only the exact 'sub1/sub2' directory and not 'subdir'
+        patterns = [r"(?:^|/)sub1/sub2(?:/|$)"]
+        overlay.mirror_with_symlink_exceptions(repo, dest, patterns)
+
+        sub1_sub2_link = os.path.join(dest, "sub1", "sub2")
+        self.assertTrue(os.path.islink(sub1_sub2_link))
+        self.assertEqual(
+            os.path.realpath(sub1_sub2_link),
+            os.path.realpath(os.path.join(repo, "sub1", "sub2")),
+        )
+
+        # 'subdir' is a different name; must be copied, not symlinked
+        subdir_path = os.path.join(dest, "subdir")
+        self.assertTrue(os.path.isdir(subdir_path))
+        self.assertFalse(os.path.islink(subdir_path))
 
 
 if __name__ == "__main__":

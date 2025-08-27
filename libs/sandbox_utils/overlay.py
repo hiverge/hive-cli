@@ -1,8 +1,11 @@
 """Overlays a directory structure (mimics the bevaviour of mount overlayfs)."""
 
 import os
+import re
 import shutil
 from collections.abc import Sequence
+from pathlib import Path
+from typing import Iterable, Pattern
 
 
 def mirror_overlay(
@@ -136,3 +139,98 @@ def mirror_overlay_and_overwrite(
   """
   mirror_overlay(base_dir, overlay_dir, file_content_map.keys())
   materialize_overrides(overlay_dir, file_content_map)
+
+
+
+def mirror_with_symlink_exceptions(
+    repo_dir: str,
+    dest_dir: str,
+    symlink_patterns: Iterable[str] | str,
+    *,
+    skip_names: set[str] | None = None,
+) -> None:
+    """
+    Copy all files/dirs from repo_dir to dest_dir, except paths that match the
+    provided regex pattern(s). Those matched paths are symlinked to the source.
+
+    - symlink_patterns: a single regex string or an iterable of regex strings,
+      applied to POSIX-style *relative* paths (e.g., "sub/dir/file.py").
+    - skip_names: optional set of basenames to skip entirely (e.g., {"__pycache__", ".git"}).
+    """
+    repo = Path(repo_dir).resolve()
+    dest = Path(dest_dir).resolve()
+    dest.mkdir(parents=True, exist_ok=True)
+
+    if isinstance(symlink_patterns, str):
+        combined_re: Pattern[str] = re.compile(symlink_patterns)
+    else:
+        combined_re = re.compile("|".join(f"(?:{p})" for p in symlink_patterns)) if symlink_patterns else re.compile(r"^\b$")  # never matches if empty
+
+    default_skips = {"__pycache__", ".git", ".mypy_cache", ".pytest_cache", ".DS_Store"}
+    if skip_names:
+        default_skips |= set(skip_names)
+
+    def rel_posix(p: Path) -> str:
+        return p.relative_to(repo).as_posix()
+
+    def should_symlink(p: Path) -> bool:
+        return bool(combined_re.search(rel_posix(p)))
+
+    def copy_file(src: Path, dst: Path) -> None:
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        # copy2 preserves mtime/permissions where possible
+        shutil.copy2(src, dst)
+
+    def link_path(src: Path, dst: Path) -> None:
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        # Remove pre-existing file/dir/link at destination
+        if dst.exists() or dst.is_symlink():
+            if dst.is_dir() and not dst.is_symlink():
+                shutil.rmtree(dst)
+            else:
+                dst.unlink()
+        # Use absolute symlink target for robustness
+        os.symlink(str(src), str(dst))
+
+    def mirror_node(src: Path, dst: Path) -> None:
+        # Skip special names
+        if src.name in default_skips:
+            return
+
+        # If the *relative* path matches, symlink this node and stop
+        if should_symlink(src):
+            link_path(src, dst)
+            return
+
+        if src.is_symlink():
+            # Preserve symlink as symlink (unless pattern says otherwise above)
+            target = src.resolve()
+            link_path(target, dst)
+        elif src.is_dir():
+            dst.mkdir(parents=True, exist_ok=True)
+            for child in src.iterdir():
+                mirror_node(child, dst / child.name)
+        elif src.is_file():
+            copy_file(src, dst)
+        else:
+            # sockets, fifos, etc. — skip
+            return
+
+    mirror_node(repo, dest)
+
+
+def apply_code_overlays(dest_dir: str, code_files: dict[str, str]) -> None:
+    """
+    Write overlay files into dest_dir. If a target path is a symlink,
+    replace it with a regular file so we don't mutate the original repo.
+    """
+    dest = Path(dest_dir).resolve()
+    for rel_path, content in code_files.items():
+        dst = dest / rel_path
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        if dst.is_symlink():
+            dst.unlink()  # replace link with a file
+        if dst.exists() and dst.is_dir():
+            shutil.rmtree(dst)
+        with open(dst, "w", encoding="utf-8") as f:
+            f.write(content)
