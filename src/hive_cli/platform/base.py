@@ -52,6 +52,9 @@ class Platform(Runtime, ABC):
         logger.info(f"Setting up environment for experiment '{self.experiment_name}'")
         logger.debug(f"The HiveConfig: {config}")
 
+        if not os.path.exists("./tmp"):
+            os.makedirs("./tmp")
+
         # Here you can add more setup logic, like initializing Kubernetes resources
         # or configuring the environment based on the HiveConfig.
         with tempfile.TemporaryDirectory(dir="./tmp") as temp_dir:

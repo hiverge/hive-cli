@@ -1,7 +1,7 @@
 import argparse
 import os
 import subprocess
-from importlib.metadata import version, PackageNotFoundError
+from importlib.metadata import PackageNotFoundError, version
 
 import portforward
 from rich.console import Console
