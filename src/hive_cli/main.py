@@ -1,6 +1,7 @@
 import argparse
 import os
 import subprocess
+from importlib.metadata import version, PackageNotFoundError
 
 import portforward
 from rich.console import Console
@@ -9,6 +10,12 @@ from rich.text import Text
 from hive_cli.config import load_config
 from hive_cli.platform.k8s import K8sPlatform
 from hive_cli.utils import event
+
+try:
+    __version__ = version("hiverge-cli")
+except PackageNotFoundError:
+    __version__ = "unknown"
+
 
 PLATFORMS = {
     "k8s": K8sPlatform,
@@ -235,6 +242,10 @@ def main():
         help="Platform to use, k8s or on-prem, default to use k8s",
     )
     parser_dashboard.set_defaults(func=show_dashboard)
+
+    # version command
+    parser_version = subparsers.add_parser("version", help="Show Hive CLI version")
+    parser_version.set_defaults(func=lambda args: print(f"Hive CLI version {__version__}"))
 
     args = parser.parse_args()
     if hasattr(args, "func"):
