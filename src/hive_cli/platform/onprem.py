@@ -21,3 +21,9 @@ class OnPremPlatform(Platform):
 
     def show_experiments(self, args):
         print("Showing experiments on-premise...")
+
+    def show_sandboxes(self, args):
+        print("Showing sandboxes on-premise...")
+
+    def log(self, args):
+        print("Showing logs for sandbox:", args.sandbox)

@@ -33,6 +33,14 @@ class Platform(Runtime, ABC):
     def show_experiments(self, args):
         pass
 
+    @abstractmethod
+    def show_sandboxes(self, args):
+        pass
+
+    @abstractmethod
+    def log(self, args):
+        pass
+
     def __init__(self, exp_name: str | None, token_path: str = None):
         super().__init__(exp_name, token_path)
 

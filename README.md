@@ -71,6 +71,15 @@ hive show exps
 hive dashboard
 ```
 
+### Show logs
+
+Sandboxes are the isolated environments where experiments run in parallel. You can list all the sandboxes and view their logs.
+
+```bash
+hive show sands
+hive log <sandbox-name>
+```
+
 ### Delete an experiment
 
 

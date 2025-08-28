@@ -1,4 +1,4 @@
-from kubernetes import client
+from kubernetes import client, watch
 from kubernetes import config as k8s_config
 from kubernetes.client.api_client import ApiClient
 from kubernetes.client.rest import ApiException
@@ -16,6 +16,8 @@ RESOURCE = "Experiment"
 RESOURCE_PLURAL = "experiments"
 # TODO: remove this once we support custom namespace
 NAMESPACE = "default"
+EXPERIMENT_NAME_LABEL = "hiverge.ai/experiment-name"
+SANDBOX_LABEL_SELECTOR = "app=hive-sandbox"
 
 
 class K8sPlatform(Platform):
@@ -85,6 +87,66 @@ class K8sPlatform(Platform):
 
         console = Console()
         console.print(table)
+
+    def show_sandboxes(self, args):
+        experiment_name = args.experiment
+
+        if experiment_name:
+            pods = self.core_client.list_namespaced_pod(
+                namespace=NAMESPACE,
+                label_selector=f"{SANDBOX_LABEL_SELECTOR},{EXPERIMENT_NAME_LABEL}={experiment_name}",
+            )
+        else:
+            pods = self.core_client.list_namespaced_pod(
+                namespace=NAMESPACE, label_selector=SANDBOX_LABEL_SELECTOR
+            )
+
+        table = Table(show_header=True, header_style="bold", box=None, show_lines=False)
+        table.add_column("Name")
+        table.add_column("Experiment")
+        table.add_column("Status")
+        table.add_column("Restarts")
+        table.add_column("Age")
+
+        for pod in pods.items:
+            restarts = 0
+
+            for cs in pod.status.container_statuses or []:
+                restarts += cs.restart_count
+
+            table.add_row(
+                pod.metadata.name,
+                pod.metadata.labels.get(EXPERIMENT_NAME_LABEL, "Unknown"),
+                pod.status.phase,
+                str(restarts),
+                humanize_time(pod.metadata.creation_timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")),
+            )
+
+        console = Console()
+        console.print(table)
+
+    def log(self, args):
+        w = watch.Watch()
+
+        try:
+            for event in w.stream(
+                self.core_client.read_namespaced_pod_log,
+                name=args.sandbox,
+                namespace=NAMESPACE,
+                container="sandbox",
+                follow=True,
+                tail_lines=args.tail,
+            ):
+                print(event)
+        except KeyboardInterrupt:
+            # Ignore the error.
+            pass
+        except ApiException as e:
+            logger.error(f"Failed to fetch logs for sandbox '{args.sandbox}': {e}")
+        except Exception as e:
+            logger.error(
+                f"An unexpected error occurred while fetching logs for sandbox '{args.sandbox}': {e}"
+            )
 
 
 def deploy(op: str, client: ApiClient, name: str, config: HiveConfig):

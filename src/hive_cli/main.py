@@ -75,6 +75,13 @@ def show_experiment(args):
     platform.show_experiments(args)
 
 
+def show_sandbox(args):
+    config = load_config(args.config)
+
+    platform = PLATFORMS[config.platform.value](None, config.token_path)
+    platform.show_sandboxes(args)
+
+
 def edit(args):
     editor = os.environ.get("EDITOR", "vim")
     subprocess.run([editor, args.config])
@@ -114,6 +121,13 @@ def show_dashboard(args):
     with portforward.forward(namespace, pod_name, args.port, remote_port, config.token_path):
         event.wait_for_ctrl_c()
         console.print("\n[bold yellow]Port forwarding stopped.[/]")
+
+
+def display_sandbox_logs(args):
+    config = load_config(args.config)
+
+    platform = PLATFORMS[config.platform.value](None, config.token_path)
+    platform.log(args)
 
 
 def main():
@@ -179,6 +193,8 @@ def main():
     # show command
     parser_show = subparsers.add_parser("show", help="Show resources")
     show_subparsers = parser_show.add_subparsers(dest="show_target")
+
+    ## show experiments
     parser_show_exp = show_subparsers.add_parser(
         "experiments", aliases=["exp", "exps"], help="Show experiments"
     )
@@ -189,6 +205,23 @@ def main():
         help="Path to the config file, default to ~/.hive/sandbox-config.yaml",
     )
     parser_show_exp.set_defaults(func=show_experiment)
+
+    ## show sandboxes
+    parser_show_sandbox = show_subparsers.add_parser(
+        "sandboxes", aliases=["sand", "sands"], help="Show sandboxes"
+    )
+    parser_show_sandbox.add_argument(
+        "-f",
+        "--config",
+        default=os.path.expandvars("$HOME/.hive/sandbox-config.yaml"),
+        help="Path to the config file, default to ~/.hive/sandbox-config.yaml",
+    )
+    parser_show_sandbox.add_argument(
+        "-exp",
+        "--experiment",
+        help="Name of the experiment running sandboxes",
+    )
+    parser_show_sandbox.set_defaults(func=show_sandbox)
 
     # edit command
     parser_edit = subparsers.add_parser("edit", help="Edit Hive configuration")
@@ -223,6 +256,24 @@ def main():
     # version command
     parser_version = subparsers.add_parser("version", help="Show Hive CLI version")
     parser_version.set_defaults(func=lambda args: print(f"Hive CLI version {__version__}"))
+
+    # log command
+    parser_log = subparsers.add_parser("log", help="Show Sandbox logs")
+    parser_log.add_argument("sandbox", help="Name of the sandbox to fetch logs for")
+    parser_log.add_argument(
+        "-f",
+        "--config",
+        default=os.path.expandvars("$HOME/.hive/sandbox-config.yaml"),
+        help="Path to the config file, default to ~/.hive/sandbox-config.yaml",
+    )
+    parser_log.add_argument(
+        "-t",
+        "--tail",
+        default=100,
+        type=int,
+        help="Number of lines to show from the end of the logs, default to 100",
+    )
+    parser_log.set_defaults(func=display_sandbox_logs)
 
     args = parser.parse_args()
     if hasattr(args, "func"):
