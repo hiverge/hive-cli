@@ -28,7 +28,7 @@ Hive-CLI is a command-line interface for managing and deploying the Hive agent a
 ### Install via pip
 
 ```bash
-pip install hiverge-cli==0.2.2
+pip install hiverge-cli
 ```
 
 ### Install from source
