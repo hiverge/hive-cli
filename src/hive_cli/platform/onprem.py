@@ -1,4 +1,3 @@
-from os import name
 from hive_cli.config import HiveConfig
 
 from .base import Platform
