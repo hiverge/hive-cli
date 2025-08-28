@@ -43,6 +43,13 @@ source start.sh
 
 Below we assume that you have a `~/.hive/sandbox-config.yaml` file.
 
+### Verify the version
+
+```bash
+hive version
+```
+
+
 ### Edit the experiment
 
 `Edit` command will open the configuration file in your default editor (e.g., vim, nano, etc.) for you to modify the experiment configuration. You can also specify a different editor using the `EDITOR` environment variable, by default it will use `vim`.
