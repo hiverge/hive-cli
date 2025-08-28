@@ -19,8 +19,8 @@ NAMESPACE = "default"
 
 
 class K8sPlatform(Platform):
-    def __init__(self, name: str, token_path: str = None):
-        super().__init__(name, token_path)
+    def __init__(self, exp_name: str | None, token_path: str = None):
+        super().__init__(exp_name, token_path)
 
         k8s_config.load_kube_config(config_file=token_path)
         self.client = client.CustomObjectsApi()

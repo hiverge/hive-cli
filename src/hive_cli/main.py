@@ -47,7 +47,6 @@ def create_experiment(args):
     config = load_config(args.config)
     # Init the platform based on the config.
     platform = PLATFORMS[config.platform.value](args.name, config.token_path)
-
     platform.create(config=config)
 
 
@@ -55,7 +54,6 @@ def update_experiment(args):
     config = load_config(args.config)
     # Init the platform based on the config.
     platform = PLATFORMS[config.platform.value](args.name, config.token_path)
-
     platform.update(args.name, config=config)
 
     console = Console()
@@ -66,14 +64,14 @@ def update_experiment(args):
 def delete_experiment(args):
     config = load_config(args.config)
 
-    platform = PLATFORMS[args.platform](args.platform, config.token_path)
+    platform = PLATFORMS[config.platform.value](args.name, config.token_path)
     platform.delete(args.name)
 
 
 def show_experiment(args):
     config = load_config(args.config)
 
-    platform = PLATFORMS[args.platform](args.platform, config.token_path)
+    platform = PLATFORMS[config.platform.value](None, config.token_path)
     platform.show_experiments(args)
 
 
@@ -89,7 +87,7 @@ def edit(args):
 
 def show_dashboard(args):
     config = load_config(args.config)
-    platform = PLATFORMS[args.platform](args.platform, config.token_path)
+    platform = PLATFORMS[config.platform.value](None, config.token_path)
     core_v1 = platform.core_client
 
     console = Console()
@@ -171,13 +169,6 @@ def main():
     )
     parser_delete_exp.add_argument("name", help="Name of the experiment")
     parser_delete_exp.add_argument(
-        "-p",
-        "--platform",
-        default="k8s",
-        choices=PLATFORMS.keys(),
-        help="Platform to use, k8s or on-prem, default to use k8s",
-    )
-    parser_delete_exp.add_argument(
         "-f",
         "--config",
         default=os.path.expandvars("$HOME/.hive/sandbox-config.yaml"),
@@ -190,13 +181,6 @@ def main():
     show_subparsers = parser_show.add_subparsers(dest="show_target")
     parser_show_exp = show_subparsers.add_parser(
         "experiments", aliases=["exp", "exps"], help="Show experiments"
-    )
-    parser_show_exp.add_argument(
-        "-p",
-        "--platform",
-        default="k8s",
-        choices=PLATFORMS.keys(),
-        help="Platform to use, k8s or on-prem, default to use k8s",
     )
     parser_show_exp.add_argument(
         "-f",
@@ -233,13 +217,6 @@ def main():
         "--config",
         default=os.path.expandvars("$HOME/.hive/sandbox-config.yaml"),
         help="Path to the config file, default to ~/.hive/sandbox-config.yaml",
-    )
-    parser_dashboard.add_argument(
-        "-p",
-        "--platform",
-        default="k8s",
-        choices=PLATFORMS.keys(),
-        help="Platform to use, k8s or on-prem, default to use k8s",
     )
     parser_dashboard.set_defaults(func=show_dashboard)
 
