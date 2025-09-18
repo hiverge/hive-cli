@@ -106,6 +106,9 @@ class Platform(Runtime, ABC):
             # Generate Dockerfile for the experiment
             generate_dockerfile(dest)
 
+        # Add ".git" to .dockerignore to improve caching
+        generate_dockerignore(dest)
+
         logger.debug(f"Building temporary repo image in {dest}")
         # build the repository image first
         image.build_image(
@@ -174,3 +177,13 @@ def generate_dockerfile(dest: Path) -> None:
         ]
     )
     (dest / "Dockerfile").write_text("\n".join(lines), encoding="utf-8")
+
+def generate_dockerignore(dest: Path) -> None:
+    """Create a .dockerignore file inside `dest`."""
+    if (dest / ".dockerignore").exists():
+        # If there's a .dockerignore already, append ".git" to it.
+        with open(dest / ".dockerignore", "a", encoding="utf-8") as f:
+            f.write("\n.git\n")
+    else:
+        # Otherwise, create a new .dockerignore file.
+        (dest / ".dockerignore").write_text(".git", encoding="utf-8")
