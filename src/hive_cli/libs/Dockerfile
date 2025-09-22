@@ -5,6 +5,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir uv
 
+WORKDIR /app/service
+
 COPY pyproject.toml .
 RUN uv pip install --system --requirement pyproject.toml
 

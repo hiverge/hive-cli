@@ -63,16 +63,15 @@ class Platform(Runtime, ABC):
 
         # Here you can add more setup logic, like initializing Kubernetes resources
         # or configuring the environment based on the HiveConfig.
-        with tempfile.TemporaryDirectory() as temp_dir:
-            image_name = self.prepare_images(config, temp_dir, push=True)
+        image_name = self.prepare_images(config, push=True)
 
-            # Populate related fields to the config, only allow to update here.
-            config.sandbox.image = image_name
+        # Populate related fields to the config, only allow to update here.
+        config.sandbox.image = image_name
 
         logger.debug(f"The updated HiveConfig: {config}")
         return config
 
-    def prepare_images(self, config: HiveConfig, temp_dir: str, push: bool = False) -> str:
+    def prepare_images(self, config: HiveConfig, push: bool = False) -> str:
         """
         Build the Docker image for the experiment.
         If `push` is True, it will push the image to the registry.
@@ -86,57 +85,57 @@ class Platform(Runtime, ABC):
             str: The name of the built image.
         """
 
-        logger.debug(f"Preparing images for experiment '{self.experiment_name}' in {temp_dir}")
+        with tempfile.TemporaryDirectory() as temp_repo_dir:
+            logger.debug(f"Preparing repo image for experiment '{self.experiment_name}' in {temp_repo_dir}")
 
-        with pkg_resources.path(hive_cli, "libs") as lib_path:
-            shutil.copytree(
-                lib_path,
-                temp_dir,
-                dirs_exist_ok=True,
+            dest = Path(temp_repo_dir) / "repo"
+            hash = git.clone_repo(config.repo.url, dest, config.repo.branch)
+            logger.debug(
+                f"Cloning repository {config.repo.url} to {dest}, the tree structure of the directory: {os.listdir('.')}, the tree structure of the {dest} directory: {os.listdir(dest)}"
             )
 
-        dest = Path(temp_dir) / "repo"
-        hash = git.clone_repo(config.repo.url, dest, config.repo.branch)
-        logger.debug(
-            f"Cloning repository {config.repo.url} to {dest}, the tree structure of the directory: {os.listdir('.')}, the tree structure of the {dest} directory: {os.listdir(dest)}"
-        )
+            if not (dest / "Dockerfile").exists():
+                logger.debug(f"No Dockerfile found in {dest}, generating one.")
+                # Generate Dockerfile for the experiment
+                generate_dockerfile(dest)
 
-        if not (dest / "Dockerfile").exists():
-            logger.debug(f"No Dockerfile found in {dest}, generating one.")
-            # Generate Dockerfile for the experiment
-            generate_dockerfile(dest)
+            # Add ".git" to .dockerignore to improve caching
+            generate_dockerignore(dest)
 
-        # Add ".git" to .dockerignore to improve caching
-        generate_dockerignore(dest)
+            logger.debug(f"Building temporary repo image in {dest}")
+            # build the repository image first
+            image.build_image(
+                image="temp-image:latest",
+                context=dest,
+                dockerfile=dest / "Dockerfile",
+                # this is a temporary image, so we don't push it
+                push=False,
+            )
 
-        logger.debug(f"Building temporary repo image in {dest}")
-        # build the repository image first
-        image.build_image(
-            image="temp-image:latest",
-            context=dest,
-            dockerfile=dest / "Dockerfile",
-            # this is a temporary image, so we don't push it
-            push=False,
-        )
+        with tempfile.TemporaryDirectory() as temp_sandbox_dir:
+            logger.debug(f"Preparing sandbox image for experiment '{self.experiment_name}' in {temp_sandbox_dir}")
 
-        if config.cloud_provider.gcp and config.cloud_provider.gcp.enabled:
-            image_registry = config.cloud_provider.gcp.image_registry
-        elif config.cloud_provider.aws and config.cloud_provider.aws.enabled:
-            image_registry = config.cloud_provider.aws.image_registry
-        else:
-            raise ValueError("Unsupported cloud provider configuration. Please enable GCP or AWS.")
+            with pkg_resources.path(hive_cli, "libs") as lib_path:
+                shutil.copytree(lib_path, temp_sandbox_dir, dirs_exist_ok=True)
 
-        # Use the git commit hash as the image tag to ensure uniqueness.
-        image_name = f"{image_registry}:{hash[:7]}"
+            if config.cloud_provider.gcp and config.cloud_provider.gcp.enabled:
+                image_registry = config.cloud_provider.gcp.image_registry
+            elif config.cloud_provider.aws and config.cloud_provider.aws.enabled:
+                image_registry = config.cloud_provider.aws.image_registry
+            else:
+                raise ValueError("Unsupported cloud provider configuration. Please enable GCP or AWS.")
 
-        logger.debug(f"Building sandbox image {image_name} in {temp_dir} with push={push}")
-        # build the sandbox image
-        image.build_image(
-            image=image_name,
-            context=temp_dir,
-            dockerfile=f"{temp_dir}/Dockerfile",
-            push=push,
-        )
+            # Use the git commit hash as the image tag to ensure uniqueness.
+            image_name = f"{image_registry}:{hash[:7]}"
+
+            logger.debug(f"Building sandbox image {image_name} in {temp_sandbox_dir} with push={push}")
+            # build the sandbox image
+            image.build_image(
+                image=image_name,
+                context=temp_sandbox_dir,
+                dockerfile=f"{temp_sandbox_dir}/Dockerfile",
+                push=push,
+            )
 
         logger.debug(
             f"Images {image_name} prepared for experiment '{self.experiment_name}' successfully."
