@@ -3,16 +3,15 @@
 import logging
 import os
 import subprocess
-import tempfile
 import threading
 from functools import wraps
 
 from flask import Flask, jsonify, request
 
 import common_tools
-import overlay
 
 REPO_DIR = "/app/repo"  # Directory where the repository is mounted
+BACKUP_DIR = "/app/.backup"  # Backup directory to restore original state
 
 app = Flask(__name__)
 sandbox_lock = threading.Lock()
@@ -55,20 +54,17 @@ def execute_python_function(
   evaluation_script: str,
 ) -> str:
   """Execute a Python function in a temporary directory."""
-  with tempfile.TemporaryDirectory(dir=".") as temp_dir:
+  try:
     args = [f'"{arg}"' if isinstance(arg, str) else f"{arg}" for arg in args]
 
-    # We (over)write the evaluation script in `code_files`
-    with open(os.path.join(REPO_DIR, evaluation_script), encoding="utf-8") as f:
-      evaluation_script_content = f.read()
-      code_files[evaluation_script] = evaluation_script_content
-
-    overlay.mirror_overlay_and_overwrite(REPO_DIR, temp_dir, code_files)
+    for rel_path, range_and_content in code_files.items():
+      with open(os.path.join(REPO_DIR, rel_path), "w", encoding="utf-8") as f:
+        f.write(range_and_content)
 
     # Run the Python program
     try:
       output = common_tools.run_command(
-        ["python", evaluation_script] + args, temp_dir, timeout, memory_limit
+        ["python", evaluation_script] + args, REPO_DIR, timeout, memory_limit
       )
       return output
     except common_tools.FunctionExecutionError as e:
@@ -77,7 +73,7 @@ def execute_python_function(
       )
       try:
         # If the script leaves checkpointed json data, find and return it
-        output = common_tools.run_command(["cat", "checkpoint.json"], temp_dir)
+        output = common_tools.run_command(["cat", "checkpoint.json"], REPO_DIR)
         return f'{{"output": {output}, "metainfo": "Checkpoint"}}'
       except common_tools.FunctionExecutionError as ee:
         logger.info(
@@ -86,6 +82,9 @@ def execute_python_function(
         raise common_tools.FunctionExecutionError(
           f"Execution failed: {e}"
         )
+  finally:
+    # Restore the original repository state using rsync
+    subprocess.run(["rsync", "-a", "--delete", BACKUP_DIR, REPO_DIR])
 
 
 @app.route("/health", methods=["GET"])
