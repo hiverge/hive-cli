@@ -32,6 +32,8 @@ test = [
   "flask==2.3.3",
   "requests",
   "psutil",
+  "pytest-asyncio",
+  "aiohttp"
 ]
 dev = [
   "ruff>=0.12",

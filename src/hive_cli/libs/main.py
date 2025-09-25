@@ -1,50 +1,59 @@
 """A simple Python sandbox server that executes Python functions."""
 
+import aiohttp
+import asyncio
 import logging
 import os
 import subprocess
 import tempfile
-import threading
-from functools import wraps
+from typing import Any
+import json
 
-from flask import Flask, jsonify, request
-
-import common_tools
-import overlay
+from hive_cli.libs import common_tools, overlay
 
 REPO_DIR = "/app/repo"  # Directory where the repository is mounted
-
-app = Flask(__name__)
-sandbox_lock = threading.Lock()
-enable_lock_sandbox = os.getenv("LOCK_SANDBOX", "false") == "true"
+SERVER_ERROR = "Problem with the server."
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def lock_sandbox(enable: bool = False):
-  def decorator(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-      if not enable:
-        return f(*args, **kwargs)
+async def send_to_server(
+  data: dict[str, Any],
+  endpoint: str,
+  initial_delay: float,
+  delay_multiplier: float,
+  request_timeout: float,
+) -> str:
+  """Sends data to the server and returns the response and the time it took."""
+  headers = {"Content-Type": "application/json"}
 
-      if not sandbox_lock.acquire(blocking=False):
-        logger.info(
-          "Experiment already running on sandbox. Rejecting new request."
-        )
-        return jsonify(
-          {"output": None, "metainfo": "Only one experiment can run at a time."}
-        ), 429
+  delay = initial_delay  # start with 1 second
+  attempt = 1
+  while True:
+    timeout = aiohttp.ClientTimeout(
+      total=request_timeout, connect=300, sock_connect=30
+    )
+    async with (
+      aiohttp.ClientSession(
+        timeout=timeout
+      ) as session,
+      session.post(endpoint, json=data, headers=headers) as response,
+    ):
+      match response.status:
+        case 200:
+          text_response = await response.text()
+          break
+        case _:
+          logger.error(
+            f"Response status: {response.status}. Attempt #{attempt}. "
+            f"Retrying in {delay:.2f} seconds...")
+          await asyncio.sleep(delay)
+          delay *= delay_multiplier  # exponential backoff
+          attempt += 1
 
-      try:
-        return f(*args, **kwargs)
-      finally:
-        sandbox_lock.release()
-
-    return decorated_function
-  return decorator
+  return json.loads(text_response)
 
 
 def execute_python_function(
@@ -88,56 +97,68 @@ def execute_python_function(
         )
 
 
-@app.route("/health", methods=["GET"])
-def health_check():
-  """Health check endpoint."""
-  return jsonify({"status": "healthy"}), 200
+async def main_loop(
+    endpoint: str,
+    initial_delay: float = 1.0,
+    delay_multiplier: float = 1.5,
+    request_timeout: float = 30.0,
+):
+  response = await send_to_server(
+    data={"status": "ready"},
+    endpoint=endpoint,
+    initial_delay=initial_delay,
+    delay_multiplier=delay_multiplier,
+    request_timeout=request_timeout,
+  )
 
+  while True:
+    match response["action"]:
+      case "stop":
+        logger.info("Received stop action. Exiting.")
+        break
+      case "run":
+        code = response.get("code")
+        timeout = float(response.get("timeout"))
+        memory_limit = response.get("memory_limit", None)
+        if memory_limit is not None:
+          memory_limit = int(memory_limit)
+        args = response.get("args", ())
+        evaluation_script = response.get("evaluation_script", "evaluator.py")
+        try:
+          result = execute_python_function(
+            code, args, timeout, memory_limit, evaluation_script
+          )
+        except common_tools.FunctionExecutionError as e:
+          logger.error("Function execution failed: %s", e)
+          result = {"output": None, "metainfo": str(e)}
+        except subprocess.SubprocessError as e:
+          logger.error("Unexpected error: %s", e)
+          if str(e) == "Exception occurred in preexec_fn.":
+            result = {
+              "output": None,
+              "metainfo": "Execution failed: Memory limit exceeded",
+            }
+          else:
+            result = {"output": None, "metainfo": "Internal server error"}
+      case _:
+        raise ValueError(f"Unknown action: {response['action']}")
 
-@app.route("/run_code", methods=["POST"])
-@lock_sandbox(enable=enable_lock_sandbox)
-def run_function():
-  """Run the Python function provided in the request."""
-  try:
-    if not request.is_json:
-      logger.error("Request content type is not application/json")
-      return jsonify(
-        {"output": None, "metainfo": "Content-Type must be application/json"}
-      ), 400
-
-    code = request.json.get("code")
-    timeout = float(request.json.get("timeout"))
-    memory_limit = request.json.get("memory_limit", None)
-    if memory_limit is not None:
-      memory_limit = int(memory_limit)
-    args = request.json.get("args", ())
-    evaluation_script = request.json.get("evaluation_script", "evaluator.py")
-
-    logger.info(
-      "Executing code with timeout=%s, memory_limit=%s, evaluation_script=%s",
-      timeout,
-      memory_limit,
-      evaluation_script,
+    response = await send_to_server(
+        data={**response, "result": result},
+        endpoint=endpoint,
+        initial_delay=initial_delay,
+        delay_multiplier=delay_multiplier,
+        request_timeout=request_timeout,
     )
 
-    result = execute_python_function(
-      code, args, timeout, memory_limit, evaluation_script
-    )
-    return result, 200
 
-  except common_tools.FunctionExecutionError as e:
-    logger.error("Function execution failed: %s", e)
-    return jsonify({"output": None, "metainfo": str(e)}), 400
-  except subprocess.SubprocessError as e:
-    logger.error("Unexpected error: %s", e)
-    if str(e) == "Exception occurred in preexec_fn.":
-      return jsonify(
-        {"output": None, "metainfo": "Execution failed: Memory limit exceeded"}
-      ), 500
-    return jsonify({"output": None, "metainfo": "Internal server error"}), 500
-
-
-if __name__ == "__main__":
-  port = int(os.environ.get("PORT", "8080"))
-  debug = os.environ.get("DEBUG", "false").lower() == "true"
-  app.run(debug=True, host="0.0.0.0", port=port)
+# TODO: Call main_loop with a given endpoint
+# if __name__ == "__main__":
+  # asyncio.run(
+  #   main_loop(
+  #     endpoint="http://localhost:8000/api/v1/sandbox",
+  #     initial_delay=1.0,
+  #     delay_multiplier=1.5,
+  #     request_timeout=30.0,
+  #   )
+  # )
