@@ -36,6 +36,8 @@ class SandboxConfig(BaseModel):
         description="The pre-processing script to run before the experiment. Use the `/data` directory to load/store datasets.",
     )
 
+class PromptConfig(BaseModel):
+    enable_evolution: bool = False
 
 class RepoConfig(BaseModel):
     url: str
@@ -108,7 +110,7 @@ class HiveConfig(BaseModel):
     repo: RepoConfig
     sandbox: SandboxConfig
     wandb: Optional[WanDBConfig] = None
-
+    prompt: PromptConfig
     # cloud vendor configuration
     cloud_provider: CloudProviderConfig
 
