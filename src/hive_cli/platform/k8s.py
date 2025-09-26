@@ -232,6 +232,9 @@ def construct_experiment(name: str, namespace: str, config: HiveConfig) -> dict:
         "spec": {
             "projectName": config.project_name,
             "coordinatorConfigName": config.coordinator_config_name,
+            "prompt": {
+                "enableOptimization": config.prompt.enable_optimization,
+            },
             "sandbox": {
                 "image": config.sandbox.image,
                 "replicas": config.sandbox.replicas,
