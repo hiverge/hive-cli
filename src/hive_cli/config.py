@@ -37,11 +37,7 @@ class SandboxConfig(BaseModel):
     )
 
 class PromptConfig(BaseModel):
-<<<<<<< HEAD
     enable_evolution: bool = False
-=======
-    enable_optimization: bool = False
->>>>>>> 298a7db (Add prompt optimization)
 
 class RepoConfig(BaseModel):
     url: str
