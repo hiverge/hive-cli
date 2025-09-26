@@ -17,6 +17,8 @@ sandbox:
       cpu: "2"
       memory: "2Gi"
     shmsize: "1Gi"
+prompt:
+  enable_evolution: false
 cloud_provider:
   gcp:
     enabled: true
