@@ -26,4 +26,4 @@ build:
 publish: build
 	@echo "Publishing $(PACKAGE_NAME) to PyPI..."
 	pip install --upgrade twine
-	twine upload -u __token__ -p $(PYPI_TOKEN) dist/*
+	twine upload -u __token__ -p $(HIVERGE_PYPI_TOKEN) dist/*
