@@ -109,8 +109,7 @@ class HiveConfig(BaseModel):
 
     repo: RepoConfig
     sandbox: SandboxConfig
-    wandb: Optional[WanDBConfig] = None
-    prompt: PromptConfig
+    prompt: Optional[PromptConfig] = None
     # cloud vendor configuration
     cloud_provider: CloudProviderConfig
 
