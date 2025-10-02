@@ -78,6 +78,7 @@ class Platform(runtime.Runtime, ABC):
                 ).keys()
             )
             # TODO: add the include_files_and_ranges here too.
+            files_of_interest += ["README.md"]
             cloud_storage.upload_directory(
                 source_directory=str(repo_dir),
                 list_of_files=files_of_interest,
