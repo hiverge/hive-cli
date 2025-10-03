@@ -51,7 +51,7 @@ def get_codebase(source: str, dest: str, branch: str = "main") -> str:
     # Case `source` is a URL, we clone it.
     if source.startswith("https://"):
         logger.debug(f"Cloning repository {source} to {dest}")
-        code_version_id = git.clone_repo(source, dest, branch)
+        code_version_id = clone_repo(source, dest, branch)
         logger.debug(
             f"Repository cloned successfully with commit ID {code_version_id}"
         )
