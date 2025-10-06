@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir uv
 
 COPY pyproject.toml .
-RUN uv pip install --system --requirement pyproject.toml
+RUN uv pip install --system --break-system-packages --requirement pyproject.toml
 
 COPY . .
 
