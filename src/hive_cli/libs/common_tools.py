@@ -9,7 +9,6 @@ import time
 import psutil
 import requests
 
-GCR_SANDBOX_BUCKET = "hi-sandbox"
 
 
 def read_stream(stream, output_list):

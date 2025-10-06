@@ -24,6 +24,7 @@ dependencies = [
     "rich>=12.5.1",
     "kubernetes>=33.1.0",
     "portforward>=0.3.0",
+    "google-cloud-storage>=2.5.0",
 ]
 
 [project.optional-dependencies]
