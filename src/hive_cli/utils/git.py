@@ -1,5 +1,6 @@
 import os
 import shutil
+import time
 from pathlib import Path
 
 import git
@@ -41,13 +42,18 @@ def get_codebase(source: str, dest: str, branch: str = "main") -> str:
         shutil.copytree(source_path, dest, dirs_exist_ok=True)
 
         # Get the current commit hash if it's a git repository.
-        repo = (
-            git.Repo.init(source_path)
-            if not os.path.exists(os.path.join(source_path, ".git"))
-            else git.Repo(source_path)
-        )
-
-    code_version_id = repo.head.commit.hexsha
+        if os.path.exists(os.path.join(source_path, ".git")):
+            repo = git.Repo(source_path)
+        else:
+            # If not a repo return a random hash based on the current time
+            logger.warning(
+                f"Source path {source} is not a git repository. Using timestamp as hash."
+            )
+            return str(int(time.time()))
+    try:
+        code_version_id = repo.head.commit.hexsha
+    except Exception as e:
+        raise ValueError(f"Repository at {dest} has no commits yet: {e}") from e
     logger.debug(
         f"Repository copied successfully with commit ID {code_version_id}"
     )
