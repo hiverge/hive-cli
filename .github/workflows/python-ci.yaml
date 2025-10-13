@@ -27,6 +27,8 @@ jobs:
 
       - name: Run Hive Tests
         run: |
+          mkdir -p test-reports
+          source .venv/bin/activate
           make test
 
       - name: Upload Test Results

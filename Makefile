@@ -11,8 +11,6 @@ format:
 
 .PHONY: test
 test: lint
-	mkdir -p test-reports && \
-	. .venv/bin/activate && \
 	pytest -v --junitxml=test-reports/hive-report.xml
 
 .PHONY: build
