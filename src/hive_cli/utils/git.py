@@ -45,7 +45,7 @@ def get_codebase(source: str, dest: str, branch: str = "main") -> str:
         if os.path.exists(os.path.join(source_path, ".git")):
             repo = git.Repo(source_path)
         else:
-            # If not a repo return a random hash based on the current time
+            # If not a repo, return a timestamp-based identifier.
             logger.warning(
                 f"Source path {source} is not a git repository. Using timestamp as hash."
             )
