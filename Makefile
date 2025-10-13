@@ -10,10 +10,10 @@ format:
 	ruff format .
 
 .PHONY: test
-test:
+test: lint
 	mkdir -p test-reports && \
 	. .venv/bin/activate && \
-	PYTHONPATH=libs:$$PYTHONPATH pytest -v --junitxml=test-reports/hive-report.xml
+	pytest -v --junitxml=test-reports/hive-report.xml
 
 .PHONY: build
 build:
