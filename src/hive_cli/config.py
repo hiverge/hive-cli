@@ -50,7 +50,7 @@ class RepoConfig(BaseModel):
         description="The evaluation script to run for the experiment. Default to 'evaluator.py'.",
     )
     evolve_files_and_ranges: str = Field(
-        description="Files to evolve, support line ranges like `file.py:1-10&21-30`."
+        description="Files to evolve, support line ranges like `file.py`, `file.py:1-10`, `file.py:1-10&21-30`."
     )
     include_files_and_ranges: str = Field(
         default="",
