@@ -11,7 +11,7 @@ format:
 
 .PHONY: test
 test: lint
-	pytest -v --junitxml=test-reports/hive-report.xml
+	pytest -v --junitxml=test-reports/report.xml
 
 .PHONY: build
 build:
