@@ -163,10 +163,6 @@ def test_local_non_git_returns_timestamp(
     src.mkdir()
     dest = tmp_path / "dest"
 
-    # Fix the timestamp so the test is deterministic
-    class _T:
-        pass
-
     fixed = 1_726_000_000
     import hive_cli.utils.git as target_module
 
