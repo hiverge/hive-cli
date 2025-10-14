@@ -258,5 +258,4 @@ def construct_experiment(name: str, namespace: str, config: HiveConfig) -> dict:
             "enableEvolution": config.prompt.enable_evolution,
         }
 
-
     return result

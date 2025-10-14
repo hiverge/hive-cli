@@ -163,11 +163,15 @@ def generate_dockerfile(dest: Path) -> None:
     if (dest / "pyproject.toml").exists():
         lines.append("# Install repository dependencies from pyproject.toml")
         lines.append("COPY pyproject.toml .")
-        lines.append("RUN uv pip install --system --break-system-packages --requirement pyproject.toml")
+        lines.append(
+            "RUN uv pip install --system --break-system-packages --requirement pyproject.toml"
+        )
     elif (dest / "requirements.txt").exists():
         lines.append("# Install repository dependencies from requirements.txt")
         lines.append("COPY requirements.txt .")
-        lines.append("RUN uv pip install --system --break-system-packages --requirement requirements.txt")
+        lines.append(
+            "RUN uv pip install --system --break-system-packages --requirement requirements.txt"
+        )
 
     lines.extend(
         [
@@ -177,6 +181,7 @@ def generate_dockerfile(dest: Path) -> None:
         ]
     )
     (dest / "Dockerfile").write_text("\n".join(lines), encoding="utf-8")
+
 
 def generate_dockerignore(dest: Path) -> None:
     """Create a .dockerignore file inside `dest`."""
