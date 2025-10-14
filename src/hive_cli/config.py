@@ -54,7 +54,7 @@ class RepoConfig(BaseModel):
     )
     include_files_and_ranges: str = Field(
         default="",
-        description="Additional files to include in the prompt and their ranges, e.g. `file.py:1-10&21-30`.",
+        description="Additional files to include in the prompt and their ranges, e.g. `file.py`, `file.py:1-10`, `file.py:1-10&21-30`.",
     )
 
     @field_validator("url")
