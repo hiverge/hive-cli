@@ -58,7 +58,9 @@ class Platform(Runtime, ABC):
             HiveConfig: The updated configuration with the image name set.
         """
 
-        logger.info(f"Setting up environment for experiment '{self.experiment_name}'")
+        logger.info(
+            f"Setting up environment for experiment '{self.experiment_name}'"
+        )
         logger.debug(f"The HiveConfig: {config}")
 
         # Here you can add more setup logic, like initializing Kubernetes resources
@@ -89,7 +91,7 @@ class Platform(Runtime, ABC):
             logger.debug(f"Preparing repo image for experiment '{self.experiment_name}' in {temp_repo_dir}")
 
             dest = Path(temp_repo_dir) / "repo"
-            hash = git.clone_repo(config.repo.url, dest, config.repo.branch)
+            hash = git.get_codebase(config.repo.url, str(dest), config.repo.branch)
             logger.debug(
                 f"Cloning repository {config.repo.url} to {dest}, the tree structure of the directory: {os.listdir('.')}, the tree structure of the {dest} directory: {os.listdir(dest)}"
             )
@@ -116,19 +118,27 @@ class Platform(Runtime, ABC):
             logger.debug(f"Preparing sandbox image for experiment '{self.experiment_name}' in {temp_sandbox_dir}")
 
             with pkg_resources.path(hive_cli, "libs") as lib_path:
-                shutil.copytree(lib_path, temp_sandbox_dir, dirs_exist_ok=True)
+                shutil.copytree(
+                    lib_path,
+                    temp_sandbox_dir,
+                    dirs_exist_ok=True,
+                )
 
             if config.cloud_provider.gcp and config.cloud_provider.gcp.enabled:
                 image_registry = config.cloud_provider.gcp.image_registry
             elif config.cloud_provider.aws and config.cloud_provider.aws.enabled:
                 image_registry = config.cloud_provider.aws.image_registry
             else:
-                raise ValueError("Unsupported cloud provider configuration. Please enable GCP or AWS.")
+                raise ValueError(
+                    "Unsupported cloud provider configuration. Please enable GCP or AWS."
+                )
 
             # Use the git commit hash as the image tag to ensure uniqueness.
             image_name = f"{image_registry}:{hash[:7]}"
 
-            logger.debug(f"Building sandbox image {image_name} in {temp_sandbox_dir} with push={push}")
+            logger.debug(
+                f"Building sandbox image {image_name} in {temp_sandbox_dir} with push={push}"
+            )
             # build the sandbox image
             image.build_image(
                 image=image_name,
@@ -162,11 +172,15 @@ def generate_dockerfile(dest: Path) -> None:
     if (dest / "pyproject.toml").exists():
         lines.append("# Install repository dependencies from pyproject.toml")
         lines.append("COPY pyproject.toml .")
-        lines.append("RUN uv pip install --system --requirement pyproject.toml")
+        lines.append(
+            "RUN uv pip install --system --break-system-packages --requirement pyproject.toml"
+        )
     elif (dest / "requirements.txt").exists():
         lines.append("# Install repository dependencies from requirements.txt")
         lines.append("COPY requirements.txt .")
-        lines.append("RUN uv pip install --system --requirement requirements.txt")
+        lines.append(
+            "RUN uv pip install --system --break-system-packages --requirement requirements.txt"
+        )
 
     lines.extend(
         [
@@ -176,6 +190,7 @@ def generate_dockerfile(dest: Path) -> None:
         ]
     )
     (dest / "Dockerfile").write_text("\n".join(lines), encoding="utf-8")
+
 
 def generate_dockerignore(dest: Path) -> None:
     """Create a .dockerignore file inside `dest`."""

@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 
 class Runtime:
-    def __init__(self, exp_name: str | None, token_path: str = None):
+    def __init__(self, exp_name: str | None = None, token_path: str = None):
         """Initialize the Runtime with a name.
         This can be used to set up any necessary runtime configurations.
         """
@@ -20,6 +20,9 @@ def generate_experiment_name(base_name: str) -> str:
     Generate a unique experiment name based on the base name and current timestamp.
     If the base name ends with '-', it will be suffixed with a timestamp.
     """
+
+    if any(c.isupper() for c in base_name):
+        raise ValueError("Experiment name must be lowercase.")
 
     experiment_name = base_name
 

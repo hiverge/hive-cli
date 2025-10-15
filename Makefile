@@ -10,10 +10,8 @@ format:
 	ruff format .
 
 .PHONY: test
-test:
-	mkdir -p test-reports && \
-	. .venv/bin/activate && \
-	PYTHONPATH=libs:$$PYTHONPATH pytest -v --junitxml=test-reports/hive-report.xml
+test: lint
+	pytest -v --junitxml=test-reports/report.xml
 
 .PHONY: build
 build:
@@ -26,4 +24,4 @@ build:
 publish: build
 	@echo "Publishing $(PACKAGE_NAME) to PyPI..."
 	pip install --upgrade twine
-	twine upload -u __token__ -p $(PYPI_TOKEN) dist/*
+	twine upload -u __token__ -p $(HIVERGE_PYPI_TOKEN) dist/*

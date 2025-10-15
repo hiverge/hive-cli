@@ -245,6 +245,7 @@ def construct_experiment(name: str, namespace: str, config: HiveConfig) -> dict:
                 "branch": config.repo.branch,
                 "evaluationScript": config.repo.evaluation_script,
                 "evolveFilesAndRanges": config.repo.evolve_files_and_ranges,
+                "includeFilesAndRanges": config.repo.include_files_and_ranges,
             },
             "cloudProvider": {
                 "spot": config.cloud_provider.spot,
@@ -252,5 +253,10 @@ def construct_experiment(name: str, namespace: str, config: HiveConfig) -> dict:
             },
         },
     }
+
+    if config.prompt:
+        result["spec"]["prompt"] = {
+            "enableEvolution": config.prompt.enable_evolution,
+        }
 
     return result
