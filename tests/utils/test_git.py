@@ -1,5 +1,6 @@
 """Test `get_codebase` utility function."""
 
+import hashlib
 import types
 from pathlib import Path
 
@@ -174,7 +175,7 @@ def test_local_non_git_returns_timestamp(
     assert mock_copytree["args"] == (src.resolve(), dest, True)
 
     # returns integer seconds as string
-    assert result == str(int(fixed))
+    assert result == hashlib.sha1(str(int(fixed)).encode()).hexdigest()[:7]
 
     # warning logged (optional but nice to assert)
     assert any(
