@@ -1,3 +1,4 @@
+import hashlib
 import os
 import shutil
 import time
@@ -49,7 +50,8 @@ def get_codebase(source: str, dest: str, branch: str = "main") -> str:
             logger.warning(
                 f"Source path {source} is not a git repository. Using timestamp as hash."
             )
-            return str(int(time.time()))
+            ts = str(int(time.time()))
+            return hashlib.sha1(ts.encode()).hexdigest()[:7]
     try:
         code_version_id = repo.head.commit.hexsha
     except Exception as e:
