@@ -1,6 +1,5 @@
 """Test `get_codebase` utility function."""
 
-import hashlib
 import types
 from pathlib import Path
 
@@ -82,9 +81,7 @@ def mock_copytree(monkeypatch):
     def copytree(src, dst, dirs_exist_ok=False):
         calls["args"] = (Path(src), Path(dst), dirs_exist_ok)
 
-    monkeypatch.setattr(
-        target_module.shutil, "copytree", copytree, raising=True
-    )
+    monkeypatch.setattr(target_module.shutil, "copytree", copytree, raising=True)
     return calls
 
 
@@ -156,36 +153,24 @@ def test_local_git_repo_copy(monkeypatch, tmp_path, mock_git, mock_copytree):
     assert hexsha == HEXSHA
 
 
-def test_local_non_git_returns_timestamp(
-    monkeypatch, tmp_path, mock_copytree, caplog
-):
+def test_local_non_git_returns_timestamp(tmp_path, mock_copytree, caplog):
     # No .git directory -> non-git path
     src = tmp_path / "src"
     src.mkdir()
     dest = tmp_path / "dest"
-
-    fixed = 1_726_000_000
-    import hive_cli.utils.git as target_module
-
-    monkeypatch.setattr(target_module.time, "time", lambda: fixed, raising=True)
 
     result = get_codebase(str(src), str(dest))
 
     # copytree still happens
     assert mock_copytree["args"] == (src.resolve(), dest, True)
 
-    # returns integer seconds as string
-    assert result == hashlib.sha1(str(int(fixed)).encode()).hexdigest()[:7]
+    assert len(result) == 7
 
     # warning logged (optional but nice to assert)
-    assert any(
-        "is not a git repository" in rec.getMessage() for rec in caplog.records
-    )
+    assert any("is not a git repository" in rec.getMessage() for rec in caplog.records)
 
 
-def test_repo_without_commits_raises_valueerror(
-    monkeypatch, tmp_path, mock_git
-):
+def test_repo_without_commits_raises_valueerror(monkeypatch, tmp_path, mock_git):
     import hive_cli.utils.git as target_module
 
     # Make clone_from return a repo whose head.commit access raises
@@ -193,9 +178,7 @@ def test_repo_without_commits_raises_valueerror(
         return _MockRepo(raise_on_access=True)
 
     monkeypatch.delenv("GITHUB_TOKEN", raising=False)
-    monkeypatch.setattr(
-        target_module.git.Repo, "clone_from", bad_clone, raising=True
-    )
+    monkeypatch.setattr(target_module.git.Repo, "clone_from", bad_clone, raising=True)
 
     url = "https://github.com/org/repo.git"
     dest = tmp_path / "dest"

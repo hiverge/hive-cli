@@ -1,11 +1,10 @@
-import hashlib
 import os
 import shutil
-import time
 from pathlib import Path
 
 import git
 
+from hive_cli.utils import time as utime
 from hive_cli.utils.logger import logger
 
 
@@ -26,9 +25,7 @@ def get_codebase(source: str, dest: str, branch: str = "main") -> str:
         token = os.getenv("GITHUB_TOKEN")
         if token:
             # Inject token into the URL for authentication
-            source = source.replace(
-                "https://", f"https://x-access-token:{token}@"
-            )
+            source = source.replace("https://", f"https://x-access-token:{token}@")
         repo = git.Repo.clone_from(source, dest)
         repo.git.checkout(branch)
     else:
@@ -50,13 +47,10 @@ def get_codebase(source: str, dest: str, branch: str = "main") -> str:
             logger.warning(
                 f"Source path {source} is not a git repository. Using timestamp as hash."
             )
-            ts = str(int(time.time()))
-            return hashlib.sha1(ts.encode()).hexdigest()[:7]
+            return utime.now_2_hash()
     try:
         code_version_id = repo.head.commit.hexsha
     except Exception as e:
         raise ValueError(f"Repository at {dest} has no commits yet: {e}") from e
-    logger.debug(
-        f"Repository copied successfully with commit ID {code_version_id}"
-    )
+    logger.debug(f"Repository copied successfully with commit ID {code_version_id}")
     return code_version_id

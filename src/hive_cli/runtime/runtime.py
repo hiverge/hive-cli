@@ -1,5 +1,4 @@
-import hashlib
-from datetime import datetime, timezone
+from hive_cli.utils import time as utime
 
 
 class Runtime:
@@ -28,8 +27,7 @@ def generate_experiment_name(base_name: str) -> str:
 
     # A generated experiment name will be returned directly.
     if base_name.endswith("-"):
-        timestamp = str(int(datetime.now(timezone.utc).timestamp()))
-        unique_hash = hashlib.sha1(timestamp.encode()).hexdigest()[:7]
-        experiment_name = f"{base_name}{unique_hash}"
+        hash = utime.now_2_hash()
+        experiment_name = f"{base_name}{hash}"
 
     return experiment_name

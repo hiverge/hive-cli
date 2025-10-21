@@ -58,9 +58,7 @@ class Platform(Runtime, ABC):
             HiveConfig: The updated configuration with the image name set.
         """
 
-        logger.info(
-            f"Setting up environment for experiment '{self.experiment_name}'"
-        )
+        logger.info(f"Setting up environment for experiment '{self.experiment_name}'")
         logger.debug(f"The HiveConfig: {config}")
 
         # Here you can add more setup logic, like initializing Kubernetes resources
@@ -88,7 +86,9 @@ class Platform(Runtime, ABC):
         """
 
         with tempfile.TemporaryDirectory() as temp_repo_dir:
-            logger.debug(f"Preparing repo image for experiment '{self.experiment_name}' in {temp_repo_dir}")
+            logger.debug(
+                f"Preparing repo image for experiment '{self.experiment_name}' in {temp_repo_dir}"
+            )
 
             dest = Path(temp_repo_dir) / "repo"
             hash = git.get_codebase(config.repo.url, str(dest), config.repo.branch)
@@ -115,7 +115,9 @@ class Platform(Runtime, ABC):
             )
 
         with tempfile.TemporaryDirectory() as temp_sandbox_dir:
-            logger.debug(f"Preparing sandbox image for experiment '{self.experiment_name}' in {temp_sandbox_dir}")
+            logger.debug(
+                f"Preparing sandbox image for experiment '{self.experiment_name}' in {temp_sandbox_dir}"
+            )
 
             with pkg_resources.path(hive_cli, "libs") as lib_path:
                 shutil.copytree(
