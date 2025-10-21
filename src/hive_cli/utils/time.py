@@ -1,4 +1,5 @@
-import datetime
+import hashlib
+from datetime import datetime, timezone
 
 
 def humanize_time(timestamp: str) -> str:
@@ -17,3 +18,10 @@ def humanize_time(timestamp: str) -> str:
         age = f"{t.seconds}s"
 
     return age
+
+
+def now_2_hash() -> str:
+    timestamp = str(int(datetime.now(timezone.utc).timestamp()))
+    unique_hash = hashlib.sha1(timestamp.encode()).hexdigest()[:7]
+
+    return unique_hash
