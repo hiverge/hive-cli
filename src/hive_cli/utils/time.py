@@ -3,10 +3,10 @@ from datetime import datetime, timezone
 
 
 def humanize_time(timestamp: str) -> str:
-    creation_time = datetime.datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ").replace(
-        tzinfo=datetime.UTC
+    creation_time = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ").replace(
+        tzinfo=timezone.utc
     )
-    t = datetime.datetime.now(datetime.UTC) - creation_time
+    t = datetime.now(timezone.utc) - creation_time
 
     if t.days > 0:
         age = f"{t.days}d"
