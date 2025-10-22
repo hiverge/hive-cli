@@ -2,7 +2,7 @@ from hive_cli.utils import time as utime
 
 
 class Runtime:
-    def __init__(self, exp_name: str | None = None, token_path: str = None):
+    def __init__(self, exp_name: str | None = None):
         """Initialize the Runtime with a name.
         This can be used to set up any necessary runtime configurations.
         """
@@ -13,6 +13,13 @@ class Runtime:
         else:
             self.experiment_name = generate_experiment_name(exp_name)
 
+        self.validate()
+
+    def validate(self):
+        if self.experiment_name and len(self.experiment_name) > 63:
+            raise ValueError(
+                f"experiment_name too long ({len(self.experiment_name)} chars, max 63)."
+            )
 
 def generate_experiment_name(base_name: str) -> str:
     """

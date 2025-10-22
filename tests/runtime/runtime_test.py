@@ -15,3 +15,9 @@ def test_generate_experiment_name():
 
     with pytest.raises(ValueError):
         Runtime("InvalidName")  # Uppercase letters should raise ValueError
+
+    runtime1 = Runtime("a" * 63)
+    assert runtime1.experiment_name == "a" * 63
+
+    with pytest.raises(ValueError):
+        Runtime("a" * 64)  # Name longer than 63 chars should raise ValueError
