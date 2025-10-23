@@ -110,6 +110,7 @@ class Platform(Runtime, ABC):
                 image="temp-image:latest",
                 context=dest,
                 dockerfile=dest / "Dockerfile",
+                platforms=",".join(config.sandbox.target_platforms),
                 # this is a temporary image, so we don't push it
                 push=False,
             )
@@ -146,6 +147,7 @@ class Platform(Runtime, ABC):
                 image=image_name,
                 context=temp_sandbox_dir,
                 dockerfile=f"{temp_sandbox_dir}/Dockerfile",
+                platforms=",".join(config.sandbox.target_platforms),
                 push=push,
             )
 
