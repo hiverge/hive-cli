@@ -27,6 +27,10 @@ class EnvConfig(BaseModel):
 
 class SandboxConfig(BaseModel):
     image: Optional[str] = None
+    target_platforms: list[str] = Field(
+        default_factory=lambda: ["linux/amd64", "linux/arm64"],
+        description="Target platforms for the sandbox Docker image. Default to ['linux/amd64', 'linux/arm64'].",
+    )
     replicas: int = 1
     timeout: int = 60
     resources: Optional[ResourceConfig] = None
