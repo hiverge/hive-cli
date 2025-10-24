@@ -26,7 +26,10 @@ class EnvConfig(BaseModel):
 
 
 class SandboxConfig(BaseModel):
-    image: Optional[str] = None
+    image: Optional[str] = Field(
+        default=None,
+        description="The Docker image to use for the sandbox. If set, it will skip the image building step.",
+    )
     target_platforms: list[str] = Field(
         default_factory=lambda: ["linux/amd64", "linux/arm64"],
         description="Target platforms for the sandbox Docker image. Default to ['linux/amd64', 'linux/arm64'].",
