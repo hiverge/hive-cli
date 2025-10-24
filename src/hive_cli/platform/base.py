@@ -63,7 +63,7 @@ class Platform(Runtime, ABC):
 
         # Here you can add more setup logic, like initializing Kubernetes resources
         # or configuring the environment based on the HiveConfig.
-        image_name = self.prepare_images(config, push=True)
+        image_name = self.prepare_images(config, push=True) if not config.sandbox.image else config.sandbox.image
 
         # Populate related fields to the config, only allow to update here.
         config.sandbox.image = image_name
