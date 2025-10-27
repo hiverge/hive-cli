@@ -23,7 +23,6 @@ def build_image(
         "--tag",
         image,
         "--load",
-        context,
     ]
     if push:
         cmd.append("--push")
@@ -31,6 +30,9 @@ def build_image(
     if build_args:
         for key, value in build_args.items():
             cmd.extend(["--build-arg", f"{key}={value}"])
+
+    cmd.append(context)
+    print(f"Image build command: {' '.join(map(str, cmd))}")
 
     try:
         if logger.isEnabledFor(logging.DEBUG):
