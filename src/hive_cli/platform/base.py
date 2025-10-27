@@ -113,6 +113,7 @@ class Platform(Runtime, ABC):
                 platforms=",".join(config.sandbox.target_platforms),
                 # this is a temporary image, so we don't push it
                 push=False,
+                build_args=config.sandbox.build_args,
             )
 
         with tempfile.TemporaryDirectory() as temp_sandbox_dir:

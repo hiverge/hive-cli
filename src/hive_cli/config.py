@@ -30,6 +30,10 @@ class SandboxConfig(BaseModel):
         default=None,
         description="The Docker image to use for the sandbox. If set, it will skip the image building step.",
     )
+    build_args: Optional[dict] = Field(
+        default=None,
+        description="Build arguments to pass to the Docker build process when building the sandbox image.",
+    )
     target_platforms: list[str] = Field(
         default_factory=lambda: ["linux/amd64", "linux/arm64"],
         description="Target platforms for the sandbox Docker image. Default to ['linux/amd64', 'linux/arm64'].",
