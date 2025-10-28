@@ -4,7 +4,20 @@
 
 **A:** We use Docker BuildKit secrets to securely embed your private dependencies during the build process. Here's how you can do it:
 
-1. **Update your Dockerfile**: Make sure your Dockerfile is set up to use the build secret. You can use the `RUN --mount=type=secret,id=mysecret` syntax to access the secret in your build steps. For example, here's an example snippet of a Dockerfile. Two steps required:
+1. **Create secret environment variable**: Set an environment variable in your shell that contains the secret value. For example, if you're using a GitHub token to access private repositories, you can set it like this:
+
+    ```bash
+    export GITHUB_TOKEN=your_github_token_here
+    ```
+
+2. **Pass the secret in Hive-CLI config yaml**:
+
+    ```yaml
+    sandbox:
+        build_secret: GITHUB_TOKEN
+    ```
+
+3. **Update your Dockerfile**: Make sure your Dockerfile is set up to use the build secret. You can use the `RUN --mount=type=secret,id=mysecret` syntax to access the secret in your build steps. Here's an example snippet of a Dockerfile that uses a GitHub token to install private dependencies:
 
     ```Dockerfile
 
@@ -25,13 +38,6 @@
 
     # Other commands here.
 
-    ```
-
-2. **Pass the secret in Hive-CLI config yaml**: The secret name here is `GITHUB_TOKEN`.
-
-    ```yaml
-    sandbox:
-        build_secret: GITHUB_TOKEN
     ```
 
 This will make the secret available during the build process, allowing you to install private dependencies without exposing sensitive information.
