@@ -103,3 +103,7 @@ See `hive -h` for more details.
 ### Debugging
 
 Change the `log_level` in the configuration file to `DEBUG` to see more detailed logs.
+
+## Troubleshooting
+
+See the [Troubleshooting Guide](docs//TROUBLESHOOTING.md) for common issues and solutions.
