@@ -114,6 +114,7 @@ class Platform(Runtime, ABC):
                 # this is a temporary image, so we don't push it
                 push=False,
                 build_args=config.sandbox.build_args,
+                build_secret=config.sandbox.build_secret,
             )
 
         with tempfile.TemporaryDirectory() as temp_sandbox_dir:
