@@ -11,6 +11,7 @@ def build_image(
     dockerfile: str = "Dockerfile",
     push: bool = False,
     build_args: dict = None,
+    build_secret: str = None,
 ):
     cmd = [
         "docker",
@@ -30,6 +31,9 @@ def build_image(
     if build_args:
         for key, value in build_args.items():
             cmd.extend(["--build-arg", f"{key}={value}"])
+
+    if build_secret:
+        cmd.extend(["--secret", f"id={build_secret},env={build_secret}"])
 
     cmd.append(context)
     print(f"Image build command: {' '.join(map(str, cmd))}")
