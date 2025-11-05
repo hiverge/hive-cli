@@ -101,18 +101,18 @@ class GCPConfig(BaseModel):
     project_id: str = Field(
         description="The GCP project ID to use for the experiment.",
     )
-    image_registry: str | None = Field(
+    artifact_registry: str | None = Field(
         default=None,
-        description="The GCP image registry to use for the experiment images. If not set, will use the default GCP registry.",
+        description="The GCP artifact registry to use for the experiment. If not set, will use the default GCP registry.",
     )
 
 
 class AWSConfig(BaseModel):
     enabled: bool = False
     spot: bool = False
-    image_registry: str | None = Field(
+    artifact_registry: str | None = Field(
         default=None,
-        description="The AWS image registry to use for the experiment images. If not set, will use the default AWS ECR registry.",
+        description="The AWS artifact registry to use for the experiment. If not set, will use the default AWS ECR registry.",
     )
 
 
@@ -160,18 +160,18 @@ class HiveConfig(BaseModel):
         if (
             self.provider.gcp
             and self.provider.gcp.enabled
-            and not self.provider.gcp.image_registry
+            and not self.provider.gcp.artifact_registry
         ):
-            self.provider.gcp.image_registry = (
+            self.provider.gcp.artifact_registry = (
                 f"gcr.io/{self.provider.gcp.project_id}/{self.project_name}"
             )
 
         if (
             self.provider.aws
             and self.provider.aws.enabled
-            and not self.provider.aws.image_registry
+            and not self.provider.aws.artifact_registry
         ):
-            self.provider.aws.image_registry = (
+            self.provider.aws.artifact_registry = (
                 f"621302123805.dkr.ecr.eu-north-1.amazonaws.com/hiverge/{self.project_name}"
             )
 

@@ -207,10 +207,13 @@ def construct_experiment(name: str, namespace: str, config: HiveConfig) -> dict:
 
     if config.provider.gcp and config.provider.gcp.enabled:
         provider_name = "gcp"
+        spot = config.provider.gcp.spot
     elif config.provider.aws and config.provider.aws.enabled:
         provider_name = "aws"
+        spot = config.provider.aws.spot
     else:
         provider_name = "unknown"
+        spot = False
 
     if config.sandbox.envs is not None:
         envs = [env.model_dump() for env in config.sandbox.envs]
@@ -264,7 +267,7 @@ def construct_experiment(name: str, namespace: str, config: HiveConfig) -> dict:
                 "includeFilesAndRanges": config.repo.include_files_and_ranges,
             },
             "cloudProvider": {
-                "spot": config.provider.spot,
+                "spot": spot,
                 "name": provider_name,
             },
         },

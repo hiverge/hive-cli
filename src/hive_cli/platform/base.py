@@ -134,9 +134,9 @@ class Platform(Runtime, ABC):
                 )
 
             if config.provider.gcp and config.provider.gcp.enabled:
-                image_registry = config.provider.gcp.image_registry
+                image_registry = config.provider.gcp.artifact_registry
             elif config.provider.aws and config.provider.aws.enabled:
-                image_registry = config.provider.aws.image_registry
+                image_registry = config.provider.aws.artifact_registry
             else:
                 raise ValueError(
                     "Unsupported cloud provider configuration. Please enable GCP or AWS."
