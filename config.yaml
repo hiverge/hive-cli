@@ -21,4 +21,5 @@ prompt:
   enable_evolution: false
 provider:
   gcp:
+    spot: true
     enabled: true
