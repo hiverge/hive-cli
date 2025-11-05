@@ -15,20 +15,16 @@ BACKUP_DIR = "/app/.backup/"  # Backup directory to restore original state
 
 app = Flask(__name__)
 sandbox_lock = threading.Lock()
-enable_lock_sandbox = os.getenv("LOCK_SANDBOX", "false") == "true"
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def lock_sandbox(enable: bool = False):
+def lock_sandbox():
   def decorator(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-      if not enable:
-        return f(*args, **kwargs)
-
       if not sandbox_lock.acquire(blocking=False):
         logger.info(
           "Experiment already running on sandbox. Rejecting new request."
@@ -93,7 +89,7 @@ def health_check():
 
 
 @app.route("/run_code", methods=["POST"])
-@lock_sandbox(enable=enable_lock_sandbox)
+@lock_sandbox()
 def run_function():
   """Run the Python function provided in the request."""
   try:
