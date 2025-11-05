@@ -205,22 +205,41 @@ def construct_experiment(name: str, namespace: str, config: HiveConfig) -> dict:
         dict: A dictionary representing the CRD for the experiment.
     """
 
-    if config.cloud_provider.gcp and config.cloud_provider.gcp.enabled:
-        cloud_provider_name = "gcp"
-    elif config.cloud_provider.aws and config.cloud_provider.aws.enabled:
-        cloud_provider_name = "aws"
+    if config.provider.gcp and config.provider.gcp.enabled:
+        provider_name = "gcp"
+        spot = config.provider.gcp.spot
+    elif config.provider.aws and config.provider.aws.enabled:
+        provider_name = "aws"
+        spot = config.provider.aws.spot
     else:
-        cloud_provider_name = "unknown"
+        provider_name = "unknown"
+        spot = False
 
     if config.sandbox.envs is not None:
         envs = [env.model_dump() for env in config.sandbox.envs]
     else:
         envs = None
 
+    resources = {}
     if config.sandbox.resources is not None:
-        resources = config.sandbox.resources.model_dump()
-    else:
-        resources = {}
+        # We keep the requests and limits in the experiment spec to maintain extensibility.
+        # Always keep requests and limits the same to avoid resource competition.
+        resources = {
+            "requests": {
+                "cpu": config.sandbox.resources.cpu,
+                "memory": config.sandbox.resources.memory,
+            },
+            "limits": {
+                "cpu": config.sandbox.resources.cpu,
+                "memory": config.sandbox.resources.memory,
+            },
+            "shmSize": config.sandbox.resources.shmsize,
+            "accelerators": config.sandbox.resources.accelerators,
+        }
+
+        if config.sandbox.resources.extended_resources is not None:
+            resources["requests"].update(config.sandbox.resources.extended_resources)
+            resources["limits"].update(config.sandbox.resources.extended_resources)
 
     result = {
         "apiVersion": f"{GROUP}/{VERSION}",
@@ -248,8 +267,8 @@ def construct_experiment(name: str, namespace: str, config: HiveConfig) -> dict:
                 "includeFilesAndRanges": config.repo.include_files_and_ranges,
             },
             "cloudProvider": {
-                "spot": config.cloud_provider.spot,
-                "name": cloud_provider_name,
+                "spot": spot,
+                "name": provider_name,
             },
         },
     }

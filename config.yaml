@@ -13,15 +13,14 @@ sandbox:
   replicas: 3
   timeout: 1800
   resources:
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
-    limits:
-      cpu: "2"
-      memory: "2Gi"
+    cpu: "500m"
+    memory: "1Gi"
     shmsize: "1Gi"
+    accelerators: a100-80gb:8
 prompt:
   enable_evolution: false
-cloud_provider:
+provider:
   gcp:
+    spot: true
     enabled: true
+    project_id: your-gcp-project-id
