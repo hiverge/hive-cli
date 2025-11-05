@@ -63,7 +63,11 @@ class Platform(Runtime, ABC):
 
         # Here you can add more setup logic, like initializing Kubernetes resources
         # or configuring the environment based on the HiveConfig.
-        image_name = self.prepare_images(config, push=True) if not config.sandbox.image else config.sandbox.image
+        image_name = (
+            self.prepare_images(config, push=True)
+            if not config.sandbox.image
+            else config.sandbox.image
+        )
 
         # Populate related fields to the config, only allow to update here.
         config.sandbox.image = image_name
@@ -129,10 +133,10 @@ class Platform(Runtime, ABC):
                     dirs_exist_ok=True,
                 )
 
-            if config.cloud_provider.gcp and config.cloud_provider.gcp.enabled:
-                image_registry = config.cloud_provider.gcp.image_registry
-            elif config.cloud_provider.aws and config.cloud_provider.aws.enabled:
-                image_registry = config.cloud_provider.aws.image_registry
+            if config.provider.gcp and config.provider.gcp.enabled:
+                image_registry = config.provider.gcp.image_registry
+            elif config.provider.aws and config.provider.aws.enabled:
+                image_registry = config.provider.aws.image_registry
             else:
                 raise ValueError(
                     "Unsupported cloud provider configuration. Please enable GCP or AWS."

@@ -14,10 +14,21 @@ class PlatformType(str, Enum):
 
 
 class ResourceConfig(BaseModel):
-    requests: Optional[dict] = None
-    limits: Optional[dict] = None
-    accelerators: Optional[str] = None  # e.g., "a100-80gb:8"
-    shmsize: Optional[str] = None
+    cpu: str = Field(
+        default="1",
+        description="The CPU resource request for the sandbox. Default to '1'.",
+    )
+    memory: str = Field(
+        default="2Gi", description="The memory resource limit for the sandbox. Default to '2Gi'."
+    )
+    accelerators: Optional[str] = Field(
+        default=None,
+        description="The accelerator resource limit for the sandbox, e.g., 'a100-80gb:8'.",
+    )
+    shmsize: Optional[str] = Field(
+        default=None, description="The size of /dev/shm for the sandbox container, e.g., '1Gi'."
+    )
+    extended_resources: Optional[dict] = None
 
 
 class EnvConfig(BaseModel):
@@ -44,7 +55,10 @@ class SandboxConfig(BaseModel):
     )
     replicas: int = 1
     timeout: int = 60
-    resources: Optional[ResourceConfig] = None
+    resources: ResourceConfig = Field(
+        default_factory=ResourceConfig,
+        description="Resource configuration for the sandbox.",
+    )
     envs: Optional[list[EnvConfig]] = None
     pre_processor: Optional[str] = Field(
         default=None,
@@ -81,14 +95,10 @@ class RepoConfig(BaseModel):
         return v
 
 
-class WanDBConfig(BaseModel):
-    enabled: bool = False
-
-
 class GCPConfig(BaseModel):
     enabled: bool = False
+    spot: bool = False
     project_id: str = Field(
-        default="runsandbox-449400",
         description="The GCP project ID to use for the experiment.",
     )
     image_registry: str | None = Field(
@@ -99,14 +109,14 @@ class GCPConfig(BaseModel):
 
 class AWSConfig(BaseModel):
     enabled: bool = False
+    spot: bool = False
     image_registry: str | None = Field(
         default=None,
         description="The AWS image registry to use for the experiment images. If not set, will use the default AWS ECR registry.",
     )
 
 
-class CloudProviderConfig(BaseModel):
-    spot: bool = False
+class ProviderConfig(BaseModel):
     gcp: Optional[GCPConfig] = None
     aws: Optional[AWSConfig] = None
 
@@ -131,8 +141,8 @@ class HiveConfig(BaseModel):
     repo: RepoConfig
     sandbox: SandboxConfig
     prompt: Optional[PromptConfig] = None
-    # cloud vendor configuration
-    cloud_provider: CloudProviderConfig
+    # vendor configuration
+    provider: ProviderConfig
 
     log_level: str = Field(
         default="INFO",
@@ -148,20 +158,20 @@ class HiveConfig(BaseModel):
 
     def model_post_init(self, __context):
         if (
-            self.cloud_provider.gcp
-            and self.cloud_provider.gcp.enabled
-            and not self.cloud_provider.gcp.image_registry
+            self.provider.gcp
+            and self.provider.gcp.enabled
+            and not self.provider.gcp.image_registry
         ):
-            self.cloud_provider.gcp.image_registry = (
-                f"gcr.io/{self.cloud_provider.gcp.project_id}/{self.project_name}"
+            self.provider.gcp.image_registry = (
+                f"gcr.io/{self.provider.gcp.project_id}/{self.project_name}"
             )
 
         if (
-            self.cloud_provider.aws
-            and self.cloud_provider.aws.enabled
-            and not self.cloud_provider.aws.image_registry
+            self.provider.aws
+            and self.provider.aws.enabled
+            and not self.provider.aws.image_registry
         ):
-            self.cloud_provider.aws.image_registry = (
+            self.provider.aws.image_registry = (
                 f"621302123805.dkr.ecr.eu-north-1.amazonaws.com/hiverge/{self.project_name}"
             )
 

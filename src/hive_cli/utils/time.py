@@ -3,9 +3,7 @@ from datetime import datetime, timezone
 
 
 def humanize_time(timestamp: str) -> str:
-    creation_time = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ").replace(
-        tzinfo=timezone.utc
-    )
+    creation_time = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
     t = datetime.now(timezone.utc) - creation_time
 
     if t.days > 0:
