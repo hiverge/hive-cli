@@ -53,7 +53,6 @@ class SandboxConfig(BaseModel):
         default_factory=lambda: ["linux/amd64", "linux/arm64"],
         description="Target platforms for the sandbox Docker image. Default to ['linux/amd64', 'linux/arm64'].",
     )
-    replicas: int = 1
     timeout: int = 60
     resources: ResourceConfig = Field(
         default_factory=ResourceConfig,
@@ -124,11 +123,15 @@ class ProviderConfig(BaseModel):
     aws: Optional[AWSConfig] = None
 
 class RuntimeConfig(BaseModel):
-  max_runtime_seconds: int = Field(
-    default=-1,
-    description="Maximum runtime for the experiment in seconds. \
-          -1 means no limit."
-  )
+    num_workers: int = Field(
+        default=1,
+        description="Number of workers to use in the experiment. Default to 1.",
+    )
+    max_runtime_seconds: int = Field(
+        default=-1,
+        description="Maximum runtime for the experiment in seconds. \
+            -1 means no limit."
+    )
 
 
 class HiveConfig(BaseModel):
