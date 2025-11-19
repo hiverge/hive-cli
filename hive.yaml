@@ -2,7 +2,7 @@
 
 project_name: <change-me>
 repo:
-  url: https://github.com/hiverge/demo-project.git
+  source: https://github.com/hiverge/demo-project.git
   branch: main
   evaluation_script: evaluator.py
   evolve_files_and_ranges: main.py
@@ -17,10 +17,15 @@ sandbox:
     memory: "1Gi"
     shmsize: "1Gi"
     accelerators: a100-80gb:8
+envs:
+  - name: foo
+    value: bar
 prompt:
   enable_evolution: false
+runtime:
+  max_runtime_seconds: 7200
 provider:
   gcp:
     spot: true
     enabled: true
-    project_id: your-gcp-project-id
+    project_id: <gcp-project-id>

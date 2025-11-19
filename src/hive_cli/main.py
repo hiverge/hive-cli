@@ -153,8 +153,8 @@ def main():
     parser_create_exp.add_argument(
         "-f",
         "--config",
-        default=os.path.expandvars("$HOME/.hive/sandbox-config.yaml"),
-        help="Path to the config file, default to ~/.hive/sandbox-config.yaml",
+        default=os.path.expandvars("$HOME/.hive/hive.yaml"),
+        help="Path to the config file, default to ~/.hive/hive.yaml",
     )
     parser_create_exp.set_defaults(func=create_experiment)
 
@@ -185,8 +185,8 @@ def main():
     parser_delete_exp.add_argument(
         "-f",
         "--config",
-        default=os.path.expandvars("$HOME/.hive/sandbox-config.yaml"),
-        help="Path to the config file, default to ~/.hive/sandbox-config.yaml",
+        default=os.path.expandvars("$HOME/.hive/hive.yaml"),
+        help="Path to the config file, default to ~/.hive/hive.yaml",
     )
     parser_delete_exp.set_defaults(func=delete_experiment)
 
@@ -201,8 +201,8 @@ def main():
     parser_show_exp.add_argument(
         "-f",
         "--config",
-        default=os.path.expandvars("$HOME/.hive/sandbox-config.yaml"),
-        help="Path to the config file, default to ~/.hive/sandbox-config.yaml",
+        default=os.path.expandvars("$HOME/.hive/hive.yaml"),
+        help="Path to the config file, default to ~/.hive/hive.yaml",
     )
     parser_show_exp.set_defaults(func=show_experiment)
 
@@ -213,8 +213,8 @@ def main():
     parser_show_sandbox.add_argument(
         "-f",
         "--config",
-        default=os.path.expandvars("$HOME/.hive/sandbox-config.yaml"),
-        help="Path to the config file, default to ~/.hive/sandbox-config.yaml",
+        default=os.path.expandvars("$HOME/.hive/hive.yaml"),
+        help="Path to the config file, default to ~/.hive/hive.yaml",
     )
     parser_show_sandbox.add_argument(
         "-exp",
@@ -232,8 +232,8 @@ def main():
     parser_edit_config.add_argument(
         "-f",
         "--config",
-        default=os.path.expandvars("$HOME/.hive/sandbox-config.yaml"),
-        help="Path to the config file, defaults to ~/.hive/sandbox-config.yaml",
+        default=os.path.expandvars("$HOME/.hive/hive.yaml"),
+        help="Path to the config file, defaults to ~/.hive/hive.yaml",
     )
     parser_edit_config.set_defaults(func=edit)
 
@@ -248,8 +248,8 @@ def main():
     parser_dashboard.add_argument(
         "-f",
         "--config",
-        default=os.path.expandvars("$HOME/.hive/sandbox-config.yaml"),
-        help="Path to the config file, default to ~/.hive/sandbox-config.yaml",
+        default=os.path.expandvars("$HOME/.hive/hive.yaml"),
+        help="Path to the config file, default to ~/.hive/hive.yaml",
     )
     parser_dashboard.set_defaults(func=show_dashboard)
 
@@ -263,8 +263,8 @@ def main():
     parser_log.add_argument(
         "-f",
         "--config",
-        default=os.path.expandvars("$HOME/.hive/sandbox-config.yaml"),
-        help="Path to the config file, default to ~/.hive/sandbox-config.yaml",
+        default=os.path.expandvars("$HOME/.hive/hive.yaml"),
+        help="Path to the config file, default to ~/.hive/hive.yaml",
     )
     parser_log.add_argument(
         "-t",

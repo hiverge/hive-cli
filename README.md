@@ -39,9 +39,9 @@ source start.sh
 
 ## How to run
 
-**Note**: Hive-CLI reads the configuration from a yaml file, by default it will look for the `~/.hive/sandbox-config.yaml`. You can also specify a different configuration file using the `-f` option. Refer to the [config.yaml](./config.yaml) for examples.
+**Note**: Hive-CLI reads the configuration from a yaml file, by default it will look for the `~/.hive/hive.yaml`. You can also specify a different configuration file using the `-f` option. Refer to the [hive.yaml](./hive.yaml) for examples.
 
-Below we assume that you have a `~/.hive/sandbox-config.yaml` file.
+Below we assume that you have a `~/.hive/hive.yaml` file.
 
 ### Verify the version
 

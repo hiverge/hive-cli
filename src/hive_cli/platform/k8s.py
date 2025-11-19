@@ -253,22 +253,24 @@ def construct_experiment(name: str, namespace: str, config: HiveConfig) -> dict:
             "coordinatorConfigName": config.coordinator_config_name,
             "sandbox": {
                 "image": config.sandbox.image,
-                "replicas": config.sandbox.replicas,
                 "timeout": config.sandbox.timeout,
                 "resources": resources,
                 "envs": envs,
                 "preprocessor": config.sandbox.pre_processor,
             },
             "repo": {
-                "url": config.repo.url,
                 "branch": config.repo.branch,
                 "evaluationScript": config.repo.evaluation_script,
                 "evolveFilesAndRanges": config.repo.evolve_files_and_ranges,
                 "includeFilesAndRanges": config.repo.include_files_and_ranges,
             },
-            "cloudProvider": {
+            "provider": {
                 "spot": spot,
                 "name": provider_name,
+            },
+            "runtime": {
+                "numAgents": config.runtime.num_agents,
+                "maxRuntimeSeconds": config.runtime.max_runtime_seconds,
             },
         },
     }

@@ -95,9 +95,9 @@ class Platform(Runtime, ABC):
             )
 
             dest = Path(temp_repo_dir) / "repo"
-            hash = git.get_codebase(config.repo.url, str(dest), config.repo.branch)
+            hash = git.get_codebase(config.repo.source, str(dest), config.repo.branch)
             logger.debug(
-                f"Cloning repository {config.repo.url} to {dest}, the tree structure of the directory: {os.listdir('.')}, the tree structure of the {dest} directory: {os.listdir(dest)}"
+                f"Cloning repository {config.repo.source} to {dest}, the tree structure of the directory: {os.listdir('.')}, the tree structure of the {dest} directory: {os.listdir(dest)}"
             )
 
             if not (dest / "Dockerfile").exists():

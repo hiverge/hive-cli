@@ -53,13 +53,15 @@ class SandboxConfig(BaseModel):
         default_factory=lambda: ["linux/amd64", "linux/arm64"],
         description="Target platforms for the sandbox Docker image. Default to ['linux/amd64', 'linux/arm64'].",
     )
-    replicas: int = 1
     timeout: int = 60
     resources: ResourceConfig = Field(
         default_factory=ResourceConfig,
         description="Resource configuration for the sandbox.",
     )
-    envs: Optional[list[EnvConfig]] = None
+    envs: Optional[list[EnvConfig]] = Field(
+        default=None,
+        description="Environment variables to set in the sandbox container.",
+    )
     pre_processor: Optional[str] = Field(
         default=None,
         description="The pre-processing script to run before the experiment. Use the `/data` directory to load/store datasets.",
@@ -71,7 +73,7 @@ class PromptConfig(BaseModel):
 
 
 class RepoConfig(BaseModel):
-    url: str
+    source: str
     branch: str = Field(
         default="main",
         description="The branch to use for the experiment. Default to 'main'.",
@@ -88,8 +90,8 @@ class RepoConfig(BaseModel):
         description="Additional files to include in the prompt and their ranges, e.g. `file.py`, `file.py:1-10`, `file.py:1-10&21-30`.",
     )
 
-    @field_validator("url")
-    def url_should_not_be_git(cls, v):
+    @field_validator("source")
+    def source_should_not_be_git(cls, v):
         if v.startswith("git@"):
             raise ValueError("Only HTTPS URLs are allowed; git@ SSH URLs are not supported.")
         return v
@@ -121,6 +123,18 @@ class ProviderConfig(BaseModel):
     aws: Optional[AWSConfig] = None
 
 
+class RuntimeConfig(BaseModel):
+    num_agents: int = Field(
+        default=1,
+        description="Number of agents to use in the experiment. Default to 1.",
+    )
+    max_runtime_seconds: int = Field(
+        default=-1,
+        description="Maximum runtime for the experiment in seconds. \
+            -1 means no limit.",
+    )
+
+
 class HiveConfig(BaseModel):
     project_name: str = Field(
         description="The name of the project. Must be all lowercase.",
@@ -138,11 +152,23 @@ class HiveConfig(BaseModel):
 
     platform: PlatformType = PlatformType.K8S
 
-    repo: RepoConfig
-    sandbox: SandboxConfig
+    runtime: RuntimeConfig = Field(
+        default_factory=RuntimeConfig, description="Runtime configuration for the experiment."
+    )
+    repo: RepoConfig = Field(
+        default_factory=RepoConfig,
+        description="Repository configuration for the experiment.",
+    )
+    sandbox: SandboxConfig = Field(
+        default_factory=SandboxConfig,
+        description="Sandbox configuration for the experiment.",
+    )
     prompt: Optional[PromptConfig] = None
+
     # vendor configuration
-    provider: ProviderConfig
+    provider: ProviderConfig = Field(
+        description="Provider configuration for the experiment.",
+    )
 
     log_level: str = Field(
         default="INFO",
