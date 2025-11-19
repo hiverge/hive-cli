@@ -18,6 +18,7 @@ def test_now_2_hash():
         expected_hash = hashlib.sha1(str(fixed_timestamp).encode()).hexdigest()[:7]
         assert now_2_hash() == expected_hash
 
+
 def test_humanize_time():
     from src.hive_cli.utils.time import humanize_time
 

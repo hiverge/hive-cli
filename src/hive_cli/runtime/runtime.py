@@ -21,6 +21,7 @@ class Runtime:
                 f"experiment_name too long ({len(self.experiment_name)} chars, max 63)."
             )
 
+
 def generate_experiment_name(base_name: str) -> str:
     """
     Generate a unique experiment name based on the base name and current timestamp.
