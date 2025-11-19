@@ -271,7 +271,7 @@ def construct_experiment(name: str, namespace: str, config: HiveConfig) -> dict:
             "runtime": {
                 "numAgents": config.runtime.num_agents,
                 "maxRuntimeSeconds": config.runtime.max_runtime_seconds,
-            }
+            },
         },
     }
 

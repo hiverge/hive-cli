@@ -28,7 +28,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-  {include-group = "test"}
+  {include-group = "test"},
   {include-group = "lint"}
 ]
 

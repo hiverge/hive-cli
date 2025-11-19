@@ -122,6 +122,7 @@ class ProviderConfig(BaseModel):
     gcp: Optional[GCPConfig] = None
     aws: Optional[AWSConfig] = None
 
+
 class RuntimeConfig(BaseModel):
     num_agents: int = Field(
         default=1,
@@ -130,7 +131,7 @@ class RuntimeConfig(BaseModel):
     max_runtime_seconds: int = Field(
         default=-1,
         description="Maximum runtime for the experiment in seconds. \
-            -1 means no limit."
+            -1 means no limit.",
     )
 
 
@@ -152,8 +153,7 @@ class HiveConfig(BaseModel):
     platform: PlatformType = PlatformType.K8S
 
     runtime: RuntimeConfig = Field(
-      default_factory=RuntimeConfig,
-      description="Runtime configuration for the experiment."
+        default_factory=RuntimeConfig, description="Runtime configuration for the experiment."
     )
     repo: RepoConfig = Field(
         default_factory=RepoConfig,
