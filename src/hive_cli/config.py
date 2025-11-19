@@ -123,9 +123,9 @@ class ProviderConfig(BaseModel):
     aws: Optional[AWSConfig] = None
 
 class RuntimeConfig(BaseModel):
-    num_workers: int = Field(
+    num_agents: int = Field(
         default=1,
-        description="Number of workers to use in the experiment. Default to 1.",
+        description="Number of agents to use in the experiment. Default to 1.",
     )
     max_runtime_seconds: int = Field(
         default=-1,
