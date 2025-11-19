@@ -19,9 +19,9 @@ sandbox:
     memory: "1Gi"
     shmsize: "1Gi"
     accelerators: a100-80gb:8
-envs:
-  - name: foo
-    value: bar
+  envs:
+    - name: foo
+      value: bar
 prompt:
   enable_evolution: false
 provider:
