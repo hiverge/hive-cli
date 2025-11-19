@@ -6,11 +6,13 @@ repo:
   branch: main
   evaluation_script: evaluator.py
   evolve_files_and_ranges: main.py
+runtime:
+  num_agents: 5
+  max_runtime_seconds: 7200
 sandbox:
   target_platforms:
     - linux/amd64
     - linux/arm64
-  replicas: 3
   timeout: 1800
   resources:
     cpu: "500m"
@@ -22,8 +24,6 @@ envs:
     value: bar
 prompt:
   enable_evolution: false
-runtime:
-  max_runtime_seconds: 7200
 provider:
   gcp:
     spot: true
