@@ -7,7 +7,7 @@ import portforward
 from rich.console import Console
 from rich.text import Text
 
-from hive_cli.config import load_config
+from hive_cli.config import HiveConfig, load_config
 from hive_cli.platform.k8s import K8sPlatform
 from hive_cli.utils import event
 
@@ -27,7 +27,14 @@ def init(args):
     print("(Unimplemented) Initializing hive...")
 
 
-def create_experiment(args):
+def create_experiment(config: HiveConfig, exp_name: str) -> HiveConfig:
+    """Create an experiment based on the config."""
+    platform = PLATFORMS[config.platform.value](exp_name, config.token_path)
+    platform.create(config=config)
+    return config
+
+
+def create_experiment_cli(args) -> None:
     BLUE = "\033[94m"
     RESET = "\033[0m"
 
@@ -46,43 +53,48 @@ def create_experiment(args):
 
     config = load_config(args.config)
     # Init the platform based on the config.
-    platform = PLATFORMS[config.platform.value](args.name, config.token_path)
-    platform.create(config=config)
+    create_experiment(config, args.name)
 
 
-def update_experiment(args):
+def update_experiment_cli(args):
     config = load_config(args.config)
     # Init the platform based on the config.
     platform = PLATFORMS[config.platform.value](args.name, config.token_path)
     platform.update(args.name, config=config)
 
     console = Console()
-    msg = Text(f"Experiment {args.name} updated successfully.", style="bold green")
+    msg = Text(
+        f"Experiment {args.name} updated successfully.", style="bold green"
+    )
     console.print(msg)
 
 
-def delete_experiment(args):
+def delete_experiment(config: HiveConfig, exp_name: str) -> None:
+    """Delete an experiment based on the config."""
+    platform = PLATFORMS[config.platform.value](exp_name, config.token_path)
+    platform.delete(exp_name)
+
+
+def delete_experiment_cli(args):
     config = load_config(args.config)
-
-    platform = PLATFORMS[config.platform.value](args.name, config.token_path)
-    platform.delete(args.name)
+    delete_experiment(config, args.name)
 
 
-def show_experiment(args):
+def show_experiment_cli(args):
     config = load_config(args.config)
 
     platform = PLATFORMS[config.platform.value](None, config.token_path)
     platform.show_experiments(args)
 
 
-def show_sandbox(args):
+def show_sandbox_cli(args):
     config = load_config(args.config)
 
     platform = PLATFORMS[config.platform.value](None, config.token_path)
     platform.show_sandboxes(args)
 
 
-def edit(args):
+def edit_cli(args):
     editor = os.environ.get("EDITOR", "vim")
     subprocess.run([editor, args.config])
 
@@ -92,7 +104,7 @@ def edit(args):
     console.print(msg)
 
 
-def show_dashboard(args):
+def show_dashboard_cli(args):
     config = load_config(args.config)
     platform = PLATFORMS[config.platform.value](None, config.token_path)
     core_v1 = platform.core_client
@@ -118,12 +130,14 @@ def show_dashboard(args):
         return
     pod_name = pods.items[0].metadata.name
 
-    with portforward.forward(namespace, pod_name, args.port, remote_port, config.token_path):
+    with portforward.forward(
+        namespace, pod_name, args.port, remote_port, config.token_path
+    ):
         event.wait_for_ctrl_c()
         console.print("\n[bold yellow]Port forwarding stopped.[/]")
 
 
-def display_sandbox_logs(args):
+def display_sandbox_logs_cli(args):
     config = load_config(args.config)
 
     platform = PLATFORMS[config.platform.value](None, config.token_path)
@@ -156,7 +170,7 @@ def main():
         default=os.path.expandvars("$HOME/.hive/hive.yaml"),
         help="Path to the config file, default to ~/.hive/hive.yaml",
     )
-    parser_create_exp.set_defaults(func=create_experiment)
+    parser_create_exp.set_defaults(func=create_experiment_cli)
 
     # TODO:
     # update command
@@ -173,7 +187,7 @@ def main():
     #     default=os.path.expandvars("$HOME/.hive/sandbox-config.yaml"),
     #     help="Path to the config file, default to ~/.hive/sandbox-config.yaml",
     # )
-    # parser_update_exp.set_defaults(func=update_experiment)
+    # parser_update_exp.set_defaults(func=update_experiment_cli)
 
     # delete command
     parser_delete = subparsers.add_parser("delete", help="Delete resources")
@@ -188,7 +202,7 @@ def main():
         default=os.path.expandvars("$HOME/.hive/hive.yaml"),
         help="Path to the config file, default to ~/.hive/hive.yaml",
     )
-    parser_delete_exp.set_defaults(func=delete_experiment)
+    parser_delete_exp.set_defaults(func=delete_experiment_cli)
 
     # show command
     parser_show = subparsers.add_parser("show", help="Show resources")
@@ -204,7 +218,7 @@ def main():
         default=os.path.expandvars("$HOME/.hive/hive.yaml"),
         help="Path to the config file, default to ~/.hive/hive.yaml",
     )
-    parser_show_exp.set_defaults(func=show_experiment)
+    parser_show_exp.set_defaults(func=show_experiment_cli)
 
     ## show sandboxes
     parser_show_sandbox = show_subparsers.add_parser(
@@ -221,7 +235,7 @@ def main():
         "--experiment",
         help="Name of the experiment running sandboxes",
     )
-    parser_show_sandbox.set_defaults(func=show_sandbox)
+    parser_show_sandbox.set_defaults(func=show_sandbox_cli)
 
     # edit command
     parser_edit = subparsers.add_parser("edit", help="Edit Hive configuration")
@@ -235,10 +249,12 @@ def main():
         default=os.path.expandvars("$HOME/.hive/hive.yaml"),
         help="Path to the config file, defaults to ~/.hive/hive.yaml",
     )
-    parser_edit_config.set_defaults(func=edit)
+    parser_edit_config.set_defaults(func=edit_cli)
 
     # dashboard command
-    parser_dashboard = subparsers.add_parser("dashboard", help="Open the Hive dashboard")
+    parser_dashboard = subparsers.add_parser(
+        "dashboard", help="Open the Hive dashboard"
+    )
     parser_dashboard.add_argument(
         "--port",
         default=9090,
@@ -251,15 +267,21 @@ def main():
         default=os.path.expandvars("$HOME/.hive/hive.yaml"),
         help="Path to the config file, default to ~/.hive/hive.yaml",
     )
-    parser_dashboard.set_defaults(func=show_dashboard)
+    parser_dashboard.set_defaults(func=show_dashboard_cli)
 
     # version command
-    parser_version = subparsers.add_parser("version", help="Show Hive CLI version")
-    parser_version.set_defaults(func=lambda args: print(f"Hive CLI version {__version__}"))
+    parser_version = subparsers.add_parser(
+        "version", help="Show Hive CLI version"
+    )
+    parser_version.set_defaults(
+        func=lambda args: print(f"Hive CLI version {__version__}")
+    )
 
     # log command
     parser_log = subparsers.add_parser("log", help="Show Sandbox logs")
-    parser_log.add_argument("sandbox", help="Name of the sandbox to fetch logs for")
+    parser_log.add_argument(
+        "sandbox", help="Name of the sandbox to fetch logs for"
+    )
     parser_log.add_argument(
         "-f",
         "--config",
@@ -273,7 +295,7 @@ def main():
         type=int,
         help="Number of lines to show from the end of the logs, default to 100",
     )
-    parser_log.set_defaults(func=display_sandbox_logs)
+    parser_log.set_defaults(func=display_sandbox_logs_cli)
 
     args = parser.parse_args()
     if hasattr(args, "func"):
