@@ -27,11 +27,10 @@ def init(args):
     print("(Unimplemented) Initializing hive...")
 
 
-def create_experiment(config: HiveConfig, exp_name: str) -> HiveConfig:
+def create_experiment(config: HiveConfig, exp_name: str) -> None:
     """Create an experiment based on the config."""
     platform = PLATFORMS[config.platform.value](exp_name, config.token_path)
     platform.create(config=config)
-    return config
 
 
 def create_experiment_cli(args) -> None:
