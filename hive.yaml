@@ -9,6 +9,7 @@ repo:
 runtime:
   num_agents: 5
   max_runtime_seconds: 7200
+  max_iterations: 100
 sandbox:
   target_platforms:
     - linux/amd64
