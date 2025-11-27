@@ -133,6 +133,11 @@ class RuntimeConfig(BaseModel):
         description="Maximum runtime for the experiment in seconds. \
             -1 means no limit.",
     )
+    max_iterations: int = Field(
+        default=-1,
+        description="Maximum number of iterations for the experiment. \
+            -1 means no limit.",
+    )
 
 
 class HiveConfig(BaseModel):
