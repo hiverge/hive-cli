@@ -53,3 +53,40 @@ def build_image(
     except subprocess.CalledProcessError as e:
         print("Build STDERR:\n", e.stderr)
         raise
+
+
+BUILD_TEMPLATE = """
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', '{}', '.']
+    env:
+      - 'DOCKER_BUILDKIT=1'
+images:
+  - '{}'
+"""
+
+
+def build_image_in_cloud(image: str, context: str = ".") -> None:
+    """Build a Docker image in GC Build and push it to Container Registry."""
+    # For now we use subprocess to call gcloud CLI because the Python SDK does
+    # not support building a local directory.
+
+    build_yaml = BUILD_TEMPLATE.format(image, image)
+    build_yaml_path = f"{context}/cloudbuild.yaml"
+    with open(build_yaml_path, "w", encoding="utf-8") as f:
+        f.write(build_yaml)
+
+    cmd = ["gcloud", "builds", "submit", "--config", build_yaml_path, "."]
+    print(f"Cloud image build command: {' '.join(map(str, cmd))}")
+
+    try:
+        subprocess.run(
+            cmd,
+            check=True,
+            capture_output=True,
+            text=True,
+            cwd=context,
+        )
+    except subprocess.CalledProcessError as e:
+        print("Build STDERR:\n", e.stderr)
+        raise
