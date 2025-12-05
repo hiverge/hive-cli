@@ -23,6 +23,10 @@ sandbox:
     - name: foo
       value: bar
 prompt:
+  context: foo
+  ideas:
+    - foo
+    - bar
   enable_evolution: false
 provider:
   gcp:

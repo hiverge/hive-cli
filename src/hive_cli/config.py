@@ -69,7 +69,18 @@ class SandboxConfig(BaseModel):
 
 
 class PromptConfig(BaseModel):
-    enable_evolution: bool = False
+    context: str = Field(
+        default="",
+        description="Some useful experiment-specific context to provide to the Hive.",
+    )
+    ideas: list[str] = Field(
+        default_factory=list,
+        description="A list of ideas which will be randomly sampled to inject into the Hive.",
+    )
+    enable_evolution: bool = Field(
+        default=False,
+        description="Whether to enable evolution for the experiment. Default to False.",
+    )
 
 
 class RepoConfig(BaseModel):
@@ -163,7 +174,10 @@ class HiveConfig(BaseModel):
         default_factory=SandboxConfig,
         description="Sandbox configuration for the experiment.",
     )
-    prompt: Optional[PromptConfig] = None
+    prompt: PromptConfig = Field(
+        default_factory=PromptConfig,
+        description="Prompt configuration for the experiment.",
+    )
 
     # vendor configuration
     provider: ProviderConfig = Field(
