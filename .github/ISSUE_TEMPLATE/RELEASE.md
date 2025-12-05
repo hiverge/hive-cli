@@ -31,7 +31,7 @@ Please do not remove items from the checklist
 - [ ] Publish the release to PyPI
     - [ ] run `make build` to build the package
     - [ ] run `make publish` to publish the package to PyPI
-- [ ] Publish the draft release prepared at the [Github releases page](https://github.com/hiverge/hiverge/releases).
+- [ ] Publish the draft release prepared at the [Github releases page](https://github.com/hiverge/hive-cli/releases).
 - [ ] Close this issue
 
 
