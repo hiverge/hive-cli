@@ -273,12 +273,14 @@ def construct_experiment(name: str, namespace: str, config: HiveConfig) -> dict:
                 "maxRuntimeSeconds": config.runtime.max_runtime_seconds,
                 "maxIterations": config.runtime.max_iterations,
             },
-            "prompt": {
-                "context": config.prompt.context,
-                "ideas": config.prompt.ideas,
-                "enableEvolution": config.prompt.enable_evolution,
-            }
         },
     }
+
+    if config.prompt:
+        result["spec"]["prompt"] = {
+            "enableEvolution": config.prompt.enable_evolution,
+            "context": config.prompt.context,
+            "ideas": config.prompt.ideas,
+        }
 
     return result
