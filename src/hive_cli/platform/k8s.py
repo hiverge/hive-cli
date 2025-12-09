@@ -279,6 +279,8 @@ def construct_experiment(name: str, namespace: str, config: HiveConfig) -> dict:
     if config.prompt:
         result["spec"]["prompt"] = {
             "enableEvolution": config.prompt.enable_evolution,
+            "context": config.prompt.context,
+            "ideas": config.prompt.ideas,
         }
 
     return result
