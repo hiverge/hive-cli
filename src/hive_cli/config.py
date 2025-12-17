@@ -69,7 +69,7 @@ class SandboxConfig(BaseModel):
     )
     preprocessor: Optional[str] = Field(
         default=None,
-        description="The pre-processing script to run before the experiment. Use the `/data/preprocessor` directory to load/store datasets.",
+        description="A pre-processor script to run before the experiment. Use the `/data/preprocessor` directory to load/store datasets.",
     )
 
 
