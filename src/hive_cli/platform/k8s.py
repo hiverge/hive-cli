@@ -256,7 +256,7 @@ def construct_experiment(name: str, namespace: str, config: HiveConfig) -> dict:
                 "timeout": config.sandbox.timeout,
                 "resources": resources,
                 "envs": envs,
-                "preprocessor": config.sandbox.pre_processor,
+                "preprocessor": config.sandbox.pre_processor or config.sandbox.preprocessor,
             },
             "repo": {
                 "branch": config.repo.branch,
