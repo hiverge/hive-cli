@@ -62,9 +62,7 @@ def update_experiment_cli(args):
     platform.update(args.name, config=config)
 
     console = Console()
-    msg = Text(
-        f"Experiment {args.name} updated successfully.", style="bold green"
-    )
+    msg = Text(f"Experiment {args.name} updated successfully.", style="bold green")
     console.print(msg)
 
 
@@ -129,9 +127,7 @@ def show_dashboard_cli(args):
         return
     pod_name = pods.items[0].metadata.name
 
-    with portforward.forward(
-        namespace, pod_name, args.port, remote_port, config.token_path
-    ):
+    with portforward.forward(namespace, pod_name, args.port, remote_port, config.token_path):
         event.wait_for_ctrl_c()
         console.print("\n[bold yellow]Port forwarding stopped.[/]")
 
@@ -251,9 +247,7 @@ def main():
     parser_edit_config.set_defaults(func=edit_cli)
 
     # dashboard command
-    parser_dashboard = subparsers.add_parser(
-        "dashboard", help="Open the Hive dashboard"
-    )
+    parser_dashboard = subparsers.add_parser("dashboard", help="Open the Hive dashboard")
     parser_dashboard.add_argument(
         "--port",
         default=9090,
@@ -269,18 +263,12 @@ def main():
     parser_dashboard.set_defaults(func=show_dashboard_cli)
 
     # version command
-    parser_version = subparsers.add_parser(
-        "version", help="Show Hive CLI version"
-    )
-    parser_version.set_defaults(
-        func=lambda args: print(f"Hive CLI version {__version__}")
-    )
+    parser_version = subparsers.add_parser("version", help="Show Hive CLI version")
+    parser_version.set_defaults(func=lambda args: print(f"Hive CLI version {__version__}"))
 
     # log command
     parser_log = subparsers.add_parser("log", help="Show Sandbox logs")
-    parser_log.add_argument(
-        "sandbox", help="Name of the sandbox to fetch logs for"
-    )
+    parser_log.add_argument("sandbox", help="Name of the sandbox to fetch logs for")
     parser_log.add_argument(
         "-f",
         "--config",

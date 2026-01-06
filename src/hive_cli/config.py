@@ -1,4 +1,3 @@
-from importlib import resources
 import os
 from enum import Enum
 from typing import Optional
@@ -12,6 +11,7 @@ from hive_cli.utils import logger
 class PlatformType(str, Enum):
     K8S = "k8s"
     # ON_PREM = "on-prem"
+
 
 class ResourceConfig(BaseModel):
     cpu: str = Field(
@@ -35,6 +35,7 @@ class EnvConfig(BaseModel):
     name: str
     value: str
 
+
 class PortConfig(BaseModel):
     port: int = Field(
         description="The port number inside the container.",
@@ -43,6 +44,7 @@ class PortConfig(BaseModel):
         default="TCP",
         description="The protocol for the port. Default to 'TCP'.",
     )
+
 
 class ServiceConfig(BaseModel):
     name: str
@@ -55,6 +57,7 @@ class ServiceConfig(BaseModel):
         default_factory=ResourceConfig,
         description="Resource configuration for the service.",
     )
+
 
 class SandboxConfig(BaseModel):
     image: Optional[str] = Field(
@@ -95,6 +98,7 @@ class SandboxConfig(BaseModel):
         default=None,
         description="Additional services to run alongside the sandbox.",
     )
+
 
 class PromptConfig(BaseModel):
     context: Optional[str] = Field(
