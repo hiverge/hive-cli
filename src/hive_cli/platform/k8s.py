@@ -263,16 +263,17 @@ def construct_experiment(name: str, namespace: str, config: HiveConfig) -> dict:
                     "accelerators": svc.resources.accelerators,
                 },
             }
-            for port in svc.ports:
-                if "ports" not in svc_dict:
-                    svc_dict["ports"] = []
-                svc_dict["ports"].append(
-                    {
-                        "name": svc.name + "-" + str(port.port),
-                        "containerPort": port.port,
-                        "protocol": port.protocol,
-                    }
-                )
+            if svc.ports is not None:
+                for port in svc.ports:
+                    if "ports" not in svc_dict:
+                        svc_dict["ports"] = []
+                    svc_dict["ports"].append(
+                        {
+                            "name": svc.name + "-" + str(port.port),
+                            "containerPort": port.port,
+                            "protocol": port.protocol,
+                        }
+                    )
 
             if svc.resources.extended_resources is not None:
                 svc_dict["resources"]["requests"].update(svc.resources.extended_resources)
