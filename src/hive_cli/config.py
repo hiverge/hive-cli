@@ -10,7 +10,7 @@ from hive_cli.utils import logger
 
 class PlatformType(str, Enum):
     K8S = "k8s"
-    ON_PREM = "on-prem"
+    # ON_PREM = "on-prem"
 
 
 class ResourceConfig(BaseModel):
@@ -34,6 +34,29 @@ class ResourceConfig(BaseModel):
 class EnvConfig(BaseModel):
     name: str
     value: str
+
+
+class PortConfig(BaseModel):
+    port: int = Field(
+        description="The port number inside the container.",
+    )
+    protocol: Optional[str] = Field(
+        default="TCP",
+        description="The protocol for the port. Default to 'TCP'.",
+    )
+
+
+class ServiceConfig(BaseModel):
+    name: str
+    image: str
+    ports: Optional[list[PortConfig]] = None
+    envs: Optional[list[EnvConfig]] = None
+    command: Optional[list[str]] = None
+    args: Optional[list[str]] = None
+    resources: ResourceConfig = Field(
+        default_factory=ResourceConfig,
+        description="Resource configuration for the service.",
+    )
 
 
 class SandboxConfig(BaseModel):
@@ -70,6 +93,10 @@ class SandboxConfig(BaseModel):
     preprocessor: Optional[str] = Field(
         default=None,
         description="A pre-processor script to run before the experiment. Use the `/data/preprocessor` directory to load/store datasets.",
+    )
+    services: Optional[list[ServiceConfig]] = Field(
+        default=None,
+        description="Additional services to run alongside the sandbox.",
     )
 
 
@@ -171,7 +198,10 @@ class HiveConfig(BaseModel):
         description="The name of the coordinator config to use for the experiment. Default to 'default-coordinator-config'.",
     )
 
-    platform: PlatformType = PlatformType.K8S
+    platform: PlatformType = Field(
+        default=PlatformType.K8S,
+        description="The platform type to use for the experiment. Default to 'k8s'.",
+    )
 
     runtime: RuntimeConfig = Field(
         default_factory=RuntimeConfig, description="Runtime configuration for the experiment."

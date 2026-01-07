@@ -241,6 +241,46 @@ def construct_experiment(name: str, namespace: str, config: HiveConfig) -> dict:
             resources["requests"].update(config.sandbox.resources.extended_resources)
             resources["limits"].update(config.sandbox.resources.extended_resources)
 
+    services = []
+    if config.sandbox.services is not None:
+        for svc in config.sandbox.services:
+            svc_dict = {
+                "name": svc.name,
+                "image": svc.image,
+                "envs": [env.model_dump() for env in svc.envs] if svc.envs else None,
+                "command": svc.command,
+                "args": svc.args,
+                "resources": {
+                    "requests": {
+                        "cpu": svc.resources.cpu,
+                        "memory": svc.resources.memory,
+                    },
+                    "limits": {
+                        "cpu": svc.resources.cpu,
+                        "memory": svc.resources.memory,
+                    },
+                    "shmSize": svc.resources.shmsize,
+                    "accelerators": svc.resources.accelerators,
+                },
+            }
+            if svc.ports is not None:
+                for port in svc.ports:
+                    if "ports" not in svc_dict:
+                        svc_dict["ports"] = []
+                    svc_dict["ports"].append(
+                        {
+                            "name": svc.name + "-" + str(port.port),
+                            "containerPort": port.port,
+                            "protocol": port.protocol,
+                        }
+                    )
+
+            if svc.resources.extended_resources is not None:
+                svc_dict["resources"]["requests"].update(svc.resources.extended_resources)
+                svc_dict["resources"]["limits"].update(svc.resources.extended_resources)
+
+            services.append(svc_dict)
+
     result = {
         "apiVersion": f"{GROUP}/{VERSION}",
         "kind": RESOURCE,
@@ -257,6 +297,7 @@ def construct_experiment(name: str, namespace: str, config: HiveConfig) -> dict:
                 "resources": resources,
                 "envs": envs,
                 "preprocessor": config.sandbox.pre_processor or config.sandbox.preprocessor,
+                "services": services,
             },
             "repo": {
                 "branch": config.repo.branch,
