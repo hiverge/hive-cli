@@ -46,7 +46,6 @@ def execute_python_function(
   code_files: dict[str, str],
   args: list,
   timeout: float,
-  memory_limit: int | None,
   evaluation_script: str,
 ) -> str:
   """Execute a Python function in a temporary directory."""
@@ -62,7 +61,7 @@ def execute_python_function(
   # Run the Python program
   try:
     output = common_tools.run_command(
-      ["python", evaluation_script] + args, REPO_DIR, timeout, memory_limit
+      ["python", evaluation_script] + args, REPO_DIR, timeout
     )
     return output
   except common_tools.FunctionExecutionError as e:
@@ -101,21 +100,17 @@ def run_function():
 
     code = request.json.get("code")
     timeout = float(request.json.get("timeout"))
-    memory_limit = request.json.get("memory_limit", None)
-    if memory_limit is not None:
-      memory_limit = int(memory_limit)
     args = request.json.get("args", ())
     evaluation_script = request.json.get("evaluation_script", "evaluator.py")
 
     logger.info(
-      "Executing code with timeout=%s, memory_limit=%s, evaluation_script=%s",
+      "Executing code with timeout=%s,  evaluation_script=%s",
       timeout,
-      memory_limit,
       evaluation_script,
     )
 
     result = execute_python_function(
-      code, args, timeout, memory_limit, evaluation_script
+      code, args, timeout, evaluation_script
     )
     return result, 200
 
