@@ -3,10 +3,8 @@
 import io
 import signal
 import subprocess
-import threading
 import time
 
-import psutil
 import requests
 
 GCR_SANDBOX_BUCKET = "hi-sandbox"
