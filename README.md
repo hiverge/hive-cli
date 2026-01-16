@@ -37,6 +37,58 @@ pip install hiverge-cli
 source start.sh
 ```
 
+## Shell Completion
+
+Hive CLI supports shell tab completion for commands, experiment names, sandbox names, and file paths. After installing the CLI, enable completion for your shell:
+
+### Bash
+
+Add the following to your `~/.bashrc`:
+
+```bash
+eval "$(register-python-argcomplete hive)"
+```
+
+Then reload your shell configuration:
+
+```bash
+source ~/.bashrc
+```
+
+### Zsh
+
+Add the following to your `~/.zshrc`:
+
+```bash
+autoload -U bashcompinit
+bashcompinit
+eval "$(register-python-argcomplete hive)"
+```
+
+Then reload your shell configuration:
+
+```bash
+source ~/.zshrc
+```
+
+### Verify
+
+Test that completion is working:
+
+```bash
+hive delete exp<TAB>   # Should list available experiments
+hive log <TAB>         # Should list available sandbox pods
+```
+
+### Features
+
+- Command and subcommand completion for all hive commands
+- Dynamic completion of experiment names for `delete` and `show sandboxes --experiment`
+- Dynamic completion of sandbox pod names for `log` command
+- File path completion for `-f/--config` flags
+
+**Note:** Completion requires access to your Kubernetes cluster to fetch experiment and sandbox names. If the cluster is unavailable, completion will still work for static options but won't show dynamic resources.
+
 ## How to run
 
 **Note**: Hive-CLI reads the configuration from a yaml file, by default it will look for the `~/.hive/hive.yaml`. You can also specify a different configuration file using the `-f` option. Refer to the [hive.yaml](./hive.yaml) for examples.
