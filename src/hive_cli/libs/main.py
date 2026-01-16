@@ -1,6 +1,5 @@
 """A simple Python sandbox server that executes Python functions."""
 
-import json
 import logging
 import os
 import subprocess
@@ -59,6 +58,7 @@ def execute_python_function(
     with open(os.path.join(REPO_DIR, rel_path), "w", encoding="utf-8") as f:
       f.write(range_and_content)
 
+  # Run the Python program
   try:
     output = common_tools.run_command(
       ["python", evaluation_script] + args, REPO_DIR, timeout
@@ -66,9 +66,20 @@ def execute_python_function(
     return output
   except common_tools.FunctionExecutionError as e:
     logger.info(
-      "Run command failed: %s.", e
+      "Run command failed: %s. Attempting to read checkpoint data.", e
     )
-    return json.dumps({"output": None, "metainfo": str(e)})
+    try:
+      # If the script leaves checkpointed json data, find and return it
+      output = common_tools.run_command(["cat", "checkpoint.json"], REPO_DIR)
+      return f'{{"output": {output}, "metainfo": "Checkpoint"}}'
+    except common_tools.FunctionExecutionError as ee:
+      logger.info(
+        "Failed to read checkpoint data: %s. Returning original error.", ee
+      )
+      raise common_tools.FunctionExecutionError(
+        f"Execution failed: {e}"
+      )
+
 
 @app.route("/health", methods=["GET"])
 def health_check():
