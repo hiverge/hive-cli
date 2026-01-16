@@ -3,10 +3,12 @@ import os
 import subprocess
 from importlib.metadata import PackageNotFoundError, version
 
+import argcomplete
 import portforward
 from rich.console import Console
 from rich.text import Text
 
+from hive_cli.completers import config_file_completer, experiment_completer, sandbox_completer
 from hive_cli.config import HiveConfig, load_config
 from hive_cli.platform.k8s import K8sPlatform
 from hive_cli.utils import event
@@ -164,7 +166,7 @@ def main():
         "--config",
         default=os.path.expandvars("$HOME/.hive/hive.yaml"),
         help="Path to the config file, default to ~/.hive/hive.yaml",
-    )
+    ).completer = config_file_completer
     parser_create_exp.set_defaults(func=create_experiment_cli)
 
     # TODO:
@@ -190,13 +192,13 @@ def main():
     parser_delete_exp = delete_subparsers.add_parser(
         "experiment", aliases=["exp"], help="Delete an experiment"
     )
-    parser_delete_exp.add_argument("name", help="Name of the experiment")
+    parser_delete_exp.add_argument("name", help="Name of the experiment").completer = experiment_completer
     parser_delete_exp.add_argument(
         "-f",
         "--config",
         default=os.path.expandvars("$HOME/.hive/hive.yaml"),
         help="Path to the config file, default to ~/.hive/hive.yaml",
-    )
+    ).completer = config_file_completer
     parser_delete_exp.set_defaults(func=delete_experiment_cli)
 
     # show command
@@ -212,7 +214,7 @@ def main():
         "--config",
         default=os.path.expandvars("$HOME/.hive/hive.yaml"),
         help="Path to the config file, default to ~/.hive/hive.yaml",
-    )
+    ).completer = config_file_completer
     parser_show_exp.set_defaults(func=show_experiment_cli)
 
     ## show sandboxes
@@ -224,12 +226,12 @@ def main():
         "--config",
         default=os.path.expandvars("$HOME/.hive/hive.yaml"),
         help="Path to the config file, default to ~/.hive/hive.yaml",
-    )
+    ).completer = config_file_completer
     parser_show_sandbox.add_argument(
         "-exp",
         "--experiment",
         help="Name of the experiment running sandboxes",
-    )
+    ).completer = experiment_completer
     parser_show_sandbox.set_defaults(func=show_sandbox_cli)
 
     # edit command
@@ -243,7 +245,7 @@ def main():
         "--config",
         default=os.path.expandvars("$HOME/.hive/hive.yaml"),
         help="Path to the config file, defaults to ~/.hive/hive.yaml",
-    )
+    ).completer = config_file_completer
     parser_edit_config.set_defaults(func=edit_cli)
 
     # dashboard command
@@ -259,7 +261,7 @@ def main():
         "--config",
         default=os.path.expandvars("$HOME/.hive/hive.yaml"),
         help="Path to the config file, default to ~/.hive/hive.yaml",
-    )
+    ).completer = config_file_completer
     parser_dashboard.set_defaults(func=show_dashboard_cli)
 
     # version command
@@ -268,13 +270,13 @@ def main():
 
     # log command
     parser_log = subparsers.add_parser("log", help="Show Sandbox logs")
-    parser_log.add_argument("sandbox", help="Name of the sandbox to fetch logs for")
+    parser_log.add_argument("sandbox", help="Name of the sandbox to fetch logs for").completer = sandbox_completer
     parser_log.add_argument(
         "-f",
         "--config",
         default=os.path.expandvars("$HOME/.hive/hive.yaml"),
         help="Path to the config file, default to ~/.hive/hive.yaml",
-    )
+    ).completer = config_file_completer
     parser_log.add_argument(
         "-t",
         "--tail",
@@ -284,6 +286,7 @@ def main():
     )
     parser_log.set_defaults(func=display_sandbox_logs_cli)
 
+    argcomplete.autocomplete(parser)
     args = parser.parse_args()
     if hasattr(args, "func"):
         args.func(args)

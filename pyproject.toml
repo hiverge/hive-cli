@@ -24,6 +24,7 @@ dependencies = [
     "rich>=12.5.1",
     "kubernetes>=33.1.0",
     "portforward>=0.3.0",
+    "argcomplete>=3.0.0",
 ]
 
 [dependency-groups]
