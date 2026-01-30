@@ -23,10 +23,8 @@ def build_image(
         dockerfile,
         "--tag",
         image,
-        "--load",
+        "--push" if push else "--load",
     ]
-    if push:
-        cmd.append("--push")
 
     if build_args:
         for key, value in build_args.items():
