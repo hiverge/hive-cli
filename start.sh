@@ -18,5 +18,6 @@ fi
 
 uv venv --python 3.12
 source .venv/bin/activate
-uv pip install -e ".[dev,test]"
+uv pip install -e .
+uv sync --group dev
 export PATH="$PROJECT/.venv/bin:$PATH"
