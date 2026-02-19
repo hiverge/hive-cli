@@ -12,6 +12,7 @@ def build_image(
     push: bool = False,
     build_args: dict = None,
     build_secret: str = None,
+    verbose: bool = False,
 ):
     cmd = [
         "docker",
@@ -35,11 +36,14 @@ def build_image(
     if build_secret:
         cmd.extend(["--secret", f"id={build_secret},env={build_secret}"])
 
+    if verbose:
+        cmd.extend(["--progress", "plain"])
+
     cmd.append(context)
     print(f"Image build command: {' '.join(map(str, cmd))}")
 
     try:
-        if logger.isEnabledFor(logging.DEBUG):
+        if logger.isEnabledFor(logging.DEBUG) or verbose:
             capture_output = False
         else:
             capture_output = True
