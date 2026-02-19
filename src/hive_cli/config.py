@@ -100,6 +100,17 @@ class SandboxConfig(BaseModel):
     )
 
 
+class DockerConfig(BaseModel):
+    dockerfile: Optional[str] = Field(
+        default=None,
+        description="Path to a custom Dockerfile, relative to the repository root.",
+    )
+    verbose: bool = Field(
+        default=False,
+        description="Enable verbose Docker build output (plain progress).",
+    )
+
+
 class PromptConfig(BaseModel):
     context: Optional[str] = Field(
         default=None,
@@ -215,6 +226,10 @@ class HiveConfig(BaseModel):
         description="Sandbox configuration for the experiment.",
     )
     prompt: Optional[PromptConfig] = None
+    docker: DockerConfig = Field(
+        default_factory=DockerConfig,
+        description="Docker build configuration.",
+    )
 
     # vendor configuration
     provider: ProviderConfig = Field(
