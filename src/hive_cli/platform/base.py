@@ -82,12 +82,13 @@ class Platform(Runtime, ABC):
 
         Args:
             config (HiveConfig): The configuration for the experiment.
-            temp_dir (str): The temporary directory to use for building the image.
             push (bool): Whether to push the image to the registry.
 
         Returns:
             str: The name of the built image.
         """
+
+        verbose = config.docker.verbose
 
         with tempfile.TemporaryDirectory() as temp_repo_dir:
             logger.debug(
@@ -100,9 +101,9 @@ class Platform(Runtime, ABC):
                 f"Cloning repository {config.repo.source} to {dest}, the tree structure of the directory: {os.listdir('.')}, the tree structure of the {dest} directory: {os.listdir(dest)}"
             )
 
-            if not (dest / "Dockerfile").exists():
-                logger.debug(f"No Dockerfile found in {dest}, generating one.")
-                # Generate Dockerfile for the experiment
+            repo_dockerfile = dest / (config.docker.dockerfile or "Dockerfile")
+            if not repo_dockerfile.exists():
+                logger.debug(f"No Dockerfile found at {repo_dockerfile}, generating one.")
                 generate_dockerfile(dest)
 
             # Add ".git" to .dockerignore to improve caching
@@ -113,12 +114,13 @@ class Platform(Runtime, ABC):
             image.build_image(
                 image="temp-image:latest",
                 context=dest,
-                dockerfile=dest / "Dockerfile",
+                dockerfile=repo_dockerfile,
                 platforms=",".join(config.sandbox.target_platforms),
                 # this is a temporary image, so we don't push it
                 push=False,
                 build_args=config.sandbox.build_args,
                 build_secret=config.sandbox.build_secret,
+                verbose=verbose,
             )
 
         with tempfile.TemporaryDirectory() as temp_sandbox_dir:
@@ -155,7 +157,9 @@ class Platform(Runtime, ABC):
                 dockerfile=f"{temp_sandbox_dir}/Dockerfile",
                 platforms=",".join(config.sandbox.target_platforms),
                 push=push,
+                verbose=verbose,
             )
+
 
         logger.debug(
             f"Images {image_name} prepared for experiment '{self.experiment_name}' successfully."
