@@ -110,15 +110,15 @@ def show_dashboard_cli(args):
 
     console = Console()
     url = f"http://localhost:{args.port}"
-    msg = Text("Hive-Dashboard is available at ", style="bold green")
+    msg = Text("Hive Dashboard is available at ", style="bold green")
     msg.append(url, style="bold magenta")
     msg.append(" ...", style="dim")
     console.print(msg)
 
     # TODO: support user namespace
-    namespace = "default"
-    svc_name = "hive-dashboard-frontend"
-    remote_port = 3000
+    namespace = "alphatrion"
+    svc_name = "alphatrion-dashboard"
+    remote_port = 8080
 
     svc = core_v1.read_namespaced_service(svc_name, namespace)
     selector = svc.spec.selector
