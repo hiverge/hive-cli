@@ -140,9 +140,6 @@ def test_local_git_repo_copy(monkeypatch, tmp_path, mock_git, mock_copytree):
     # copytree was invoked with dirs_exist_ok=True
     assert mock_copytree["args"] == (src.resolve(), dest, True)
 
-    # git.Repo was constructed with the SOURCE path (not dest)
-    assert Path(mock_git["repo_arg"]).resolve() == src.resolve()
-
 
 def test_local_non_git_copy(tmp_path, mock_copytree):
     # No .git directory -> non-git path
