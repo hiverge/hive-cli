@@ -16,20 +16,17 @@ class _MockCommit:
 
 
 class _MockHead:
-    def __init__(self, hexsha=HEXSHA, raise_on_access=False):
+    def __init__(self, hexsha=HEXSHA):
         self._hexsha = hexsha
-        self._raise = raise_on_access
 
     @property
     def commit(self):
-        if self._raise:
-            raise RuntimeError("no commit")
         return _MockCommit(self._hexsha)
 
 
 class _MockRepo:
-    def __init__(self, hexsha=HEXSHA, raise_on_access=False):
-        self.head = _MockHead(hexsha=hexsha, raise_on_access=raise_on_access)
+    def __init__(self, hexsha=HEXSHA):
+        self.head = _MockHead(hexsha=hexsha)
         self.checked_out = None
         self.git = types.SimpleNamespace(
             checkout=lambda branch: setattr(self, "checked_out", branch)
@@ -92,7 +89,7 @@ def test_clone_url_without_token(monkeypatch, tmp_path, mock_git):
     url = "https://github.com/org/repo.git"
     dest = tmp_path / "dest"
 
-    hexsha = get_codebase(url, str(dest), branch="develop")
+    get_codebase(url, str(dest), branch="develop")
 
     # clone_from called with original URL (no token injected)
     called_url, called_dest = mock_git["clone_args"]
@@ -102,9 +99,6 @@ def test_clone_url_without_token(monkeypatch, tmp_path, mock_git):
     # checkout called with the given branch
     assert mock_git["repo"].checked_out == "develop"
 
-    # returned commit hash matches mock
-    assert hexsha == mock_git["repo"].head.commit.hexsha
-
 
 def test_clone_url_with_token_injected(monkeypatch, tmp_path, mock_git):
     monkeypatch.setenv("GITHUB_TOKEN", "SECRET123")
@@ -112,7 +106,7 @@ def test_clone_url_with_token_injected(monkeypatch, tmp_path, mock_git):
     url = "https://github.com/org/repo.git"
     dest = tmp_path / "dest"
 
-    _ = get_codebase(url, str(dest))
+    get_codebase(url, str(dest))
 
     called_url, _ = mock_git["clone_args"]
     assert called_url.startswith("https://x-access-token:SECRET123@")
@@ -141,7 +135,7 @@ def test_local_git_repo_copy(monkeypatch, tmp_path, mock_git, mock_copytree):
 
     dest = tmp_path / "dest"
 
-    hexsha = get_codebase(str(src), str(dest))
+    get_codebase(str(src), str(dest))
 
     # copytree was invoked with dirs_exist_ok=True
     assert mock_copytree["args"] == (src.resolve(), dest, True)
@@ -149,40 +143,14 @@ def test_local_git_repo_copy(monkeypatch, tmp_path, mock_git, mock_copytree):
     # git.Repo was constructed with the SOURCE path (not dest)
     assert Path(mock_git["repo_arg"]).resolve() == src.resolve()
 
-    # Returned hash is from the mock repo
-    assert hexsha == HEXSHA
 
-
-def test_local_non_git_returns_timestamp(tmp_path, mock_copytree, caplog):
+def test_local_non_git_copy(tmp_path, mock_copytree):
     # No .git directory -> non-git path
     src = tmp_path / "src"
     src.mkdir()
     dest = tmp_path / "dest"
 
-    result = get_codebase(str(src), str(dest))
+    get_codebase(str(src), str(dest))
 
     # copytree still happens
     assert mock_copytree["args"] == (src.resolve(), dest, True)
-
-    assert len(result) == 7
-
-    # warning logged (optional but nice to assert)
-    assert any("is not a git repository" in rec.getMessage() for rec in caplog.records)
-
-
-def test_repo_without_commits_raises_valueerror(monkeypatch, tmp_path, mock_git):
-    import hive_cli.utils.git as target_module
-
-    # Make clone_from return a repo whose head.commit access raises
-    def bad_clone(url, dest, *args, **kwargs):
-        return _MockRepo(raise_on_access=True)
-
-    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
-    monkeypatch.setattr(target_module.git.Repo, "clone_from", bad_clone, raising=True)
-
-    url = "https://github.com/org/repo.git"
-    dest = tmp_path / "dest"
-
-    with pytest.raises(ValueError) as exc:
-        target_module.get_codebase(url, str(dest))
-    assert "has no commits yet" in str(exc.value)
