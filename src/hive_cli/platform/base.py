@@ -9,6 +9,7 @@ import hive_cli
 from hive_cli.config import HiveConfig
 from hive_cli.runtime.runtime import Runtime
 from hive_cli.utils import git, image
+from hive_cli.utils import time as utime
 from hive_cli.utils.logger import logger
 
 
@@ -96,7 +97,7 @@ class Platform(Runtime, ABC):
             )
 
             dest = Path(temp_repo_dir) / "repo"
-            hash = git.get_codebase(config.repo.source, str(dest), config.repo.branch)
+            git.get_codebase(config.repo.source, str(dest), config.repo.branch)
             logger.debug(
                 f"Cloning repository {config.repo.source} to {dest}, the tree structure of the directory: {os.listdir('.')}, the tree structure of the {dest} directory: {os.listdir(dest)}"
             )
@@ -144,8 +145,8 @@ class Platform(Runtime, ABC):
                     "Unsupported cloud provider configuration. Please enable GCP or AWS."
                 )
 
-            # Use the git commit hash as the image tag to ensure uniqueness.
-            image_name = f"{image_registry}:{hash[:7]}"
+            tag = utime.now_us()
+            image_name = f"{image_registry}:{tag}"
 
             logger.debug(
                 f"Building sandbox image {image_name} in {temp_sandbox_dir} with push={push}"

@@ -18,6 +18,10 @@ def humanize_time(timestamp: str) -> str:
     return age
 
 
+def now_us() -> str:
+    return str(int(datetime.now(timezone.utc).timestamp() * 1_000_000))
+
+
 def now_2_hash() -> str:
     timestamp = str(int(datetime.now(timezone.utc).timestamp()))
     unique_hash = hashlib.sha1(timestamp.encode()).hexdigest()[:7]
