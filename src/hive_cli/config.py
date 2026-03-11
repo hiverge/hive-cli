@@ -236,6 +236,11 @@ class HiveConfig(BaseModel):
         description="Provider configuration for the experiment.",
     )
 
+    labels: Optional[str] = Field(
+        default=None,
+        description="Comma-separated labels for the experiment, e.g. 'label:value,tag'. Labels without a value are treated as tags.",
+    )
+
     log_level: str = Field(
         default="INFO",
         enumerated=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
