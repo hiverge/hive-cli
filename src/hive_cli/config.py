@@ -199,6 +199,11 @@ class HiveConfig(BaseModel):
         description="The name of the project. Must be all lowercase.",
     )
 
+    tags: Optional[list[str]] = Field(
+        default=None,
+        description="Tags to apply to the experiment, e.g. ['production', 'test'].",
+    )
+
     token_path: str = Field(
         default=os.path.expandvars("$HOME/.kube/config"),
         description="Path to the auth token file, default to ~/.kube/config",
@@ -234,11 +239,6 @@ class HiveConfig(BaseModel):
     # vendor configuration
     provider: ProviderConfig = Field(
         description="Provider configuration for the experiment.",
-    )
-
-    labels: Optional[str] = Field(
-        default=None,
-        description="Comma-separated labels for the experiment, e.g. 'label:value,tag'. Labels without a value are treated as tags.",
     )
 
     log_level: str = Field(
