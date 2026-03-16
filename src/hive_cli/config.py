@@ -199,6 +199,11 @@ class HiveConfig(BaseModel):
         description="The name of the project. Must be all lowercase.",
     )
 
+    tags: Optional[list[str]] = Field(
+        default=None,
+        description="Tags to apply to the experiment, e.g. ['production', 'test'].",
+    )
+
     token_path: str = Field(
         default=os.path.expandvars("$HOME/.kube/config"),
         description="Path to the auth token file, default to ~/.kube/config",
