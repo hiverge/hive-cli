@@ -1,3 +1,8 @@
+
+# Deprecated
+This repo has been superseded by [hivekit](https://github.com/hiverge/hivekit).
+
+
 # Hive-CLI
 
 Hive-CLI is a command-line interface for managing and deploying the Hive agent and experiments on Kubernetes and other platforms.
